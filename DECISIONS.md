@@ -54,3 +54,77 @@ Reopening condition: the project operator supplies the real Orion sponsor
 documentation URL, API base URL, OpenAPI/schema reference, or hackathon
 devfolio page. GATE-001 is then re-run against that source and this
 decision is revisited.
+
+**Superseded by DEC-002 and DEC-003 below.**
+
+---
+
+## DEC-002: GATE-001's first test method was invalid; reclassified, not deleted
+
+Date: 2026-09-04
+
+Context: the operator correctly pointed out that "can a search engine
+discover Orion" is not the pre-registered GATE-001 pass rule. The pass
+rule is "can the known Orion attestation surface be called on a real
+Store agent and independently verified." The original test never issued
+a single direct HTTP request to a primary-source URL — it only ran
+WebSearch queries and treated a lack of indexed results as equivalent to
+endpoint unavailability. Those are not the same thing.
+
+Decision: the original GATE-001 entry in `GATES.md` is reclassified from
+`FAIL` to `INVALID_TEST` rather than deleted or rewritten — it remains
+genuinely useful negative discovery evidence (no public documentation of
+this product is indexed anywhere), it is simply not a gate result.
+`evidence/campaign/gate-001-search-log.md` is preserved verbatim.
+
+GATE-001 was then re-run properly: direct `curl`/HTTP requests against
+every primary-source URL supplied by the operator
+(`orionagents.org`, `/store`, `/concierge`, `/docs`, `/docs/x402`, and the
+claimed `/api/x402/attestation/{id}` route). See `GATES.md` Attempt 2 and
+`evidence/campaign/gate-001-direct-probe-log.md`.
+
+---
+
+## DEC-003: GATE-001 direct-probe retest result — FAIL, work stays blocked
+
+Date: 2026-09-04
+
+Observation: every one of the supplied primary-source URLs, requested
+directly (not via search), returns HTTP 404 with an identical
+application-level "This app isn't live yet" placeholder — the signature
+of a hosting project that has never had a build deployed to it, not a
+partially-implemented app with a few dead routes. DNS resolves and the
+host answers behind a real Google Cloud front-end, so this is not a DNS
+or connectivity artifact. No sibling domain resolves. No GitHub
+organization or repository exists for this product under any searched
+name. No independently corroborated official social account or hackathon
+page was found either.
+
+Decision: GATE-001 stays `FAIL`. This satisfies the operator's own
+pre-registered FAIL condition ("exact/current route is absent"),
+established this time by direct request. Per DEC-001 (unchanged) and
+`BUILD_CONTRACT.md` section 4, deep backend work that assumes a specific
+Orion attestation schema, signer, or verifier stays blocked. Per the
+operator's explicit instruction, the Orion-agnostic modules (policy
+engine, lease service, executor invariants, receipt schema) are also
+**not** to be started yet, to avoid the fallback architecture becoming
+HIREWALL by inertia.
+
+What this is not: proof no live Orion surface exists anywhere. It is
+proof the exact URLs supplied are not currently serving an application.
+A different, correct URL — a production domain distinct from
+`orionagents.org`, a staging URL, or a surface reachable only after
+hackathon registration — could still be real and was not tested because
+it was not supplied.
+
+Hackathon deadline extension claim: searched for independent
+corroboration (official `@Orion_Agents` account, hackathon devfolio/site,
+news mirrors) and found none reachable from this environment. This claim
+is recorded as **unverified**, not assumed true or false, in
+`submission-facts.json`. The prior September 2 deadline referenced
+nowhere in this repo's own docs is likewise not assumed; no deadline is
+asserted anywhere in this repo until independently confirmed.
+
+Reopening condition: unchanged from DEC-001 — the operator supplies a
+confirmed-live Orion URL (sponsor docs, API base, hackathon portal link)
+that this agent can independently request and get a real response from.

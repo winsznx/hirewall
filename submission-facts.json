@@ -13,7 +13,16 @@
   "orionIntegration": {
     "surface": null,
     "identifiersUsed": [],
-    "note": "Blocked on GATE-001. See GATES.md and DECISIONS.md DEC-001."
+    "note": "Blocked on GATE-001 (FAIL as of direct-probe retest 2026-09-04). Every primary-source URL supplied (orionagents.org, /store, /concierge, /docs, /docs/x402, /api/x402/attestation/{id}) returns HTTP 404 with an identical 'app isn't live yet' placeholder on direct request. See GATES.md and DECISIONS.md DEC-002/DEC-003."
+  },
+  "competition": {
+    "deadline": null,
+    "deadlineExtensionClaim": {
+      "claim": "Orion extended the Builder Hackathon by 14 days; 300+ builders, 18 live applications",
+      "source": "reported to this agent by the operator, attributed to public mirrors of @Orion_Agents",
+      "status": "unverified — no independent corroboration found (no official account, hackathon page, or news mirror located via web search as of 2026-09-04)",
+      "note": "Not asserted as true or false. No deadline of any kind is asserted in this repo until independently confirmed from an official source."
+    }
   },
   "sourceCommit": null,
   "verifierVersion": null,
