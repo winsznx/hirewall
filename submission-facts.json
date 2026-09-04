@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "1.0",
+  "status": "incomplete — GATE-001 not yet passed, see GATES.md",
+  "canonicalOneLiner": "No valid AgentBound authorization, no dispatch through HIREWALL.",
+  "deploymentUrls": {
+    "web": null,
+    "api": null
+  },
+  "network": {
+    "chain": "Base",
+    "chainId": null
+  },
+  "orionIntegration": {
+    "surface": null,
+    "identifiersUsed": [],
+    "note": "Blocked on GATE-001. See GATES.md and DECISIONS.md DEC-001."
+  },
+  "sourceCommit": null,
+  "verifierVersion": null,
+  "policyVersion": null,
+  "headlineExperiment": {
+    "runId": null,
+    "cohortDenominator": null,
+    "measuredDecisions": null
+  },
+  "liveTransactions": [],
+  "publicReceiptIds": [],
+  "reproductionCommands": [],
+  "evidenceClassification": {
+    "live": [],
+    "fixture": ["all frontend fixture scenarios listed in HIREWALL_FRONTEND_HANDOFF.md section 28"],
+    "faultInjection": ["fault_injection_tamper", "fault_injection_expiry"]
+  },
+  "limitations": [
+    "Backend does not exist yet. Frontend runs entirely on fixture/fault-injection data.",
+    "GATE-001 (public live Orion AgentBound attestation retrieval) has not passed — see GATES.md.",
+    "No live transaction, receipt, or catalog run has been produced. All numbers in this file are null, not placeholder values, until measured."
+  ],
+  "withdrawnClaims": []
+}
