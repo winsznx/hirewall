@@ -544,8 +544,13 @@ Object.assign(
   )
 );
 
+// Required dev fixture scenario: catalog_mixed_results (frontend handoff
+// section 28). Candidates below intentionally mix AUTHORIZE, REFUSE, and
+// UNVERIFIABLE outcomes so /catalog has a non-trivial fixture to render
+// before a real frozen catalog run exists.
 export const FIXTURE_CATALOG_RUN: CatalogRun = {
-  id: "catalog_run_2026_08_30",
+  id: "catalog_mixed_results",
+  evidenceMode: "fixture",
   runTimestamp: "2026-08-30T09:00:00Z",
   snapshotHash: "0x2e91...aa04",
   cohortDenominator: 128,

@@ -300,29 +300,12 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Section 2: High-Confidence Numbers / Experiment Stats (Right below Hero) */}
-      <section className="border-b border-border bg-surface py-12">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="grid grid-cols-2 gap-6 text-center sm:grid-cols-4">
-            <div>
-              <p className="text-3xl font-bold tracking-tight text-ink">128</p>
-              <p className="mt-1 text-[13px] text-ink-muted">Catalog Cohort</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold tracking-tight text-authorize">100%</p>
-              <p className="mt-1 text-[13px] text-ink-muted">Deterministic Checks</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold tracking-tight text-ink">9</p>
-              <p className="mt-1 text-[13px] text-ink-muted">Proof Verifications</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold tracking-tight text-accent">$0.00</p>
-              <p className="mt-1 text-[13px] text-ink-muted">Unverified Leakage</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/*
+        Measured-results surface intentionally omitted.
+        BUILD_CONTRACT.md section 5: numbers here must be generated from
+        submission-facts.json once a real catalog run and gate log exist.
+        Do not hard-code experiment figures.
+      */}
 
       {/* Section 3: 3-Column Core Value Props */}
       <section className="border-b border-border bg-canvas py-20">

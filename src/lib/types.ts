@@ -193,6 +193,7 @@ export interface CatalogCandidateRow {
 
 export interface CatalogRun {
   id: string;
+  evidenceMode: EvidenceMode;
   runTimestamp: string;
   snapshotHash: string;
   cohortDenominator: number;

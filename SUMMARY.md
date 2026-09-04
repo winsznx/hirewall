@@ -9,13 +9,13 @@ This document provides an extensive and detailed summary of all development work
 HIREWALL is an **AI-agent dispatch firewall** enforcing the core product rule:
 > **"No valid AgentBound authorization, no dispatch through HIREWALL."**
 
-The frontend has been built from the ground up to satisfy all strict requirements, vocabulary constraints, evidence modes, and delivery checklist items specified in [`HIREWALL_FRONTEND_HANDOFF.md`](file:///c:/Users/DELL/Desktop/hirewall/HIREWALL_FRONTEND_HANDOFF.md).
+The frontend has been built from the ground up to satisfy all strict requirements, vocabulary constraints, evidence modes, and delivery checklist items specified in [`HIREWALL_FRONTEND_HANDOFF.md`](HIREWALL_FRONTEND_HANDOFF.md).
 
 ---
 
 ## 2. Complete Inventory of Work Done
 
-### A. Landing Page & Hero Redesign ([`src/app/page.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/app/page.tsx))
+### A. Landing Page & Hero Redesign ([`src/app/page.tsx`](src/app/page.tsx))
 1. **Layout Restructuring**:
    - Redesigned the hero section following modern infrastructure and operational risk design references.
    - Strictly scoped the ambient background geometric grid lines so they are contained entirely within the top hero section and terminate right below the hero console.
@@ -35,7 +35,7 @@ The frontend has been built from the ground up to satisfy all strict requirement
 4. **Deep-Dive Showcases**:
    - **Technical Proof Surface**: Breakdown of the 9-check deterministic verification engine.
    - **The Winning Demo Scene**: Zero-trust refusal demonstration showing `REFUSE`, `ATTESTATION_EXPIRED`, and direct link to immutable refusal receipt.
-5. **Sticky Stop-and-Scroll Workflow Architecture ([`src/components/WorkflowStickyScroll.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/components/WorkflowStickyScroll.tsx))**:
+5. **Sticky Stop-and-Scroll Workflow Architecture ([`src/components/WorkflowStickyScroll.tsx`](src/components/WorkflowStickyScroll.tsx))**:
    - Fixed parent container CSS scroll-context collision (removed `overflow-x-hidden`).
    - Implemented real-time viewport bounding tracking (`getBoundingClientRect`) so the active stage updates fluidly from `1/4` to `4/4` as the user scrolls.
    - Pinned the left-hand title, description, and interactive step jump buttons (`01`, `02`, `03`, `04`) in place (`sticky top-28`).
@@ -44,16 +44,16 @@ The frontend has been built from the ground up to satisfy all strict requirement
 ---
 
 ### B. Global Navigation & Real Production Footer
-1. **Floating Pill Navigation ([`src/components/TopNav.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/components/TopNav.tsx))**:
+1. **Floating Pill Navigation ([`src/components/TopNav.tsx`](src/components/TopNav.tsx))**:
    - Transformed the header into a centered floating rounded pill with backdrop blur, active link indicators, and a direct `Dispatch a task` action button.
    - Mobile-responsive horizontal scroll pill navigation.
-2. **Real Production Footer ([`src/components/Footer.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/components/Footer.tsx))**:
+2. **Real Production Footer ([`src/components/Footer.tsx`](src/components/Footer.tsx))**:
    - Implemented a complete 4-column footer containing brand overview, Base Mainnet badge, all product route links (`/dispatch`, `/proof-lab`, `/catalog`, `/verify`, `/about`), security architecture checklist, and CLI verification snippet (`hirewall verify`).
    - Added transparent product boundaries and limitation disclaimer note.
 
 ---
 
-### C. Smooth Inertia Scrolling Integration ([`src/components/SmoothScroll.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/components/SmoothScroll.tsx))
+### C. Smooth Inertia Scrolling Integration ([`src/components/SmoothScroll.tsx`](src/components/SmoothScroll.tsx))
 - Installed and integrated the `lenis` smooth scrolling library.
 - Configured gentle lerp and smooth wheel/touch physics.
 - Added smooth hash anchor navigation handling (e.g. jumping between sections).
@@ -61,7 +61,7 @@ The frontend has been built from the ground up to satisfy all strict requirement
 
 ---
 
-### D. Redesigned & Editorial About Page ([`src/app/about/page.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/app/about/page.tsx))
+### D. Redesigned & Editorial About Page ([`src/app/about/page.tsx`](src/app/about/page.tsx))
 - Removed all boxy cards, nested widgets, and repetitive card grids as instructed by the handoff specification (Section 19).
 - Created a clean, editorial typography layout with clear narrative sections:
   - **The Core Rule**: *"No valid AgentBound authorization, no dispatch through HIREWALL."*
@@ -72,7 +72,7 @@ The frontend has been built from the ground up to satisfy all strict requirement
 
 ---
 
-### E. Primary Dispatch Workspace ([`src/app/dispatch/page.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/app/dispatch/page.tsx))
+### E. Primary Dispatch Workspace ([`src/app/dispatch/page.tsx`](src/app/dispatch/page.tsx))
 - **Dual Segmented Modes**:
   - **Find a worker**: Task description, max budget in USDC, optional capability/category, and fallback toggle.
   - **Check a specific worker**: Direct Orion slug, wallet, or listing identifier.
@@ -81,17 +81,17 @@ The frontend has been built from the ground up to satisfy all strict requirement
 
 ---
 
-### F. Live & Finished Workflow View ([`src/app/dispatch/[workflowId]/page.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/app/dispatch/%5BworkflowId%5D/page.tsx))
+### F. Live & Finished Workflow View ([`src/app/dispatch/[workflowId]/page.tsx`](src/app/dispatch/%5BworkflowId%5D/page.tsx))
 - **Frozen Policy Summary**: Network (Base), Max Spend, Freshness requirement, and Wallet Match.
 - **Agent Loop Trace**: Sequential rendering of fallback candidate inspections (e.g., *Candidate A Refused $\rightarrow$ Candidate B Authorized*).
 - **Decision Stamp & Refusal Details**: Visually dominant `AUTHORIZE`, `REFUSE`, or `UNVERIFIABLE` stamps with exact backend refusal codes.
-- **Verification Checklist ([`src/components/VerificationChecklist.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/components/VerificationChecklist.tsx))**: 9 deterministic boolean checks with PASS, FAIL, SKIPPED, and UNAVAILABLE states, plus expected vs. observed diffs.
-- **Authorization Lease ([`src/components/AuthorizationLease.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/components/AuthorizationLease.tsx))**: Displays active lease, hashes, and live countdown timer that automatically flips to `EXPIRED`.
-- **Decoupled Settlement Status ([`src/components/SettlementStatus.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/components/SettlementStatus.tsx))**: Independent display of payment transport state (`NOT_ATTEMPTED`, `PENDING`, `SUCCEEDED`, `FAILED`, `UNKNOWN`) without mutating the identity decision.
+- **Verification Checklist ([`src/components/VerificationChecklist.tsx`](src/components/VerificationChecklist.tsx))**: 9 deterministic boolean checks with PASS, FAIL, SKIPPED, and UNAVAILABLE states, plus expected vs. observed diffs.
+- **Authorization Lease ([`src/components/AuthorizationLease.tsx`](src/components/AuthorizationLease.tsx))**: Displays active lease, hashes, and live countdown timer that automatically flips to `EXPIRED`.
+- **Decoupled Settlement Status ([`src/components/SettlementStatus.tsx`](src/components/SettlementStatus.tsx))**: Independent display of payment transport state (`NOT_ATTEMPTED`, `PENDING`, `SUCCEEDED`, `FAILED`, `UNKNOWN`) without mutating the identity decision.
 
 ---
 
-### G. Proof Lab — Controlled Fault Injection ([`src/app/proof-lab/page.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/app/proof-lab/page.tsx))
+### G. Proof Lab — Controlled Fault Injection ([`src/app/proof-lab/page.tsx`](src/app/proof-lab/page.tsx))
 - Judge-facing security challenge lab.
 - Supported scenarios:
   1. *Valid credential* (baseline pass)
@@ -105,7 +105,7 @@ The frontend has been built from the ground up to satisfy all strict requirement
 
 ---
 
-### H. Shareable Public Receipt Page ([`src/app/receipts/[receiptId]/page.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/app/receipts/%5BreceiptId%5D/page.tsx))
+### H. Shareable Public Receipt Page ([`src/app/receipts/[receiptId]/page.tsx`](src/app/receipts/%5BreceiptId%5D/page.tsx))
 - Full evidence artifact with:
   - Request summary, task hash, and budget.
   - Candidate identity and listing link.
@@ -119,14 +119,14 @@ The frontend has been built from the ground up to satisfy all strict requirement
 
 ---
 
-### I. Independent Receipt Verifier ([`src/app/verify/page.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/app/verify/page.tsx))
+### I. Independent Receipt Verifier ([`src/app/verify/page.tsx`](src/app/verify/page.tsx))
 - Supports input via Receipt ID / URL or pasted raw JSON.
 - Recomputes 10 independent verification gates.
 - Explicitly details `NOT CLAIMED` states (e.g. unattempted payments).
 
 ---
 
-### J. Frozen Orion Catalog Experiment ([`src/app/catalog/page.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/app/catalog/page.tsx))
+### J. Frozen Orion Catalog Experiment ([`src/app/catalog/page.tsx`](src/app/catalog/page.tsx))
 - Displays whole-field experiment snapshot (`cohortDenominator: 128`).
 - Compares baseline Orion store rule vs. HIREWALL deterministic rule.
 - Outcome breakdown: **71 Authorize**, **49 Refuse**, **8 Unverifiable**.
@@ -134,11 +134,11 @@ The frontend has been built from the ground up to satisfy all strict requirement
 
 ---
 
-### K. Typed API Adapter Architecture ([`src/lib/api/`](file:///c:/Users/DELL/Desktop/hirewall/src/lib/api/))
-- **`HirewallApi` Interface** ([`hirewall-api.ts`](file:///c:/Users/DELL/Desktop/hirewall/src/lib/api/hirewall-api.ts)): Strongly typed contract for all dispatch, receipt, verifier, catalog, and Proof Lab calls.
-- **`FixtureHirewallApi`** ([`fixture-api.ts`](file:///c:/Users/DELL/Desktop/hirewall/src/lib/api/fixture-api.ts)): Development adapter backed by 18 comprehensive fixture scenarios.
-- **`RemoteHirewallApi`** ([`remote-api.ts`](file:///c:/Users/DELL/Desktop/hirewall/src/lib/api/remote-api.ts)): Production-ready HTTP/SSE client template for backend integration.
-- **Global Dev Banner ([`DevFixtureBanner.tsx`](file:///c:/Users/DELL/Desktop/hirewall/src/components/DevFixtureBanner.tsx))**: Visibly flags development mock data so it is never confused with live production evidence.
+### K. Typed API Adapter Architecture ([`src/lib/api/`](src/lib/api/))
+- **`HirewallApi` Interface** ([`hirewall-api.ts`](src/lib/api/hirewall-api.ts)): Strongly typed contract for all dispatch, receipt, verifier, catalog, and Proof Lab calls.
+- **`FixtureHirewallApi`** ([`fixture-api.ts`](src/lib/api/fixture-api.ts)): Development adapter backed by 18 comprehensive fixture scenarios.
+- **`RemoteHirewallApi`** ([`remote-api.ts`](src/lib/api/remote-api.ts)): Production-ready HTTP/SSE client template for backend integration.
+- **Global Dev Banner ([`DevFixtureBanner.tsx`](src/components/DevFixtureBanner.tsx))**: Visibly flags development mock data so it is never confused with live production evidence.
 
 ---
 

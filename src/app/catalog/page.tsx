@@ -2,6 +2,7 @@ import { hirewallApi } from "@/lib/api/client";
 import { EmptyState } from "@/components/EmptyState";
 import { CatalogTable } from "@/components/CatalogTable";
 import { HashValue } from "@/components/HashValue";
+import { EvidenceModeBadge } from "@/components/EvidenceModeBadge";
 
 export default async function CatalogPage() {
   const run = await hirewallApi.getLatestCatalogRun();
@@ -18,7 +19,10 @@ export default async function CatalogPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">Frozen Orion catalog run</p>
+      <div className="flex items-center gap-2">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">Frozen Orion catalog run</p>
+        <EvidenceModeBadge mode={run.evidenceMode} />
+      </div>
       <h1 className="mt-1 text-xl font-semibold tracking-tight text-ink">
         {run.runTimestamp} · {run.cohortDenominator} candidates
       </h1>
