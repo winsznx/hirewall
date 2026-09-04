@@ -17,8 +17,29 @@ exists. See `src/lib/api/remote-api.ts` for the integration seam.
 
 ## Backend
 
-Not yet implemented. Blocked on `GATES.md` GATE-001 — see that file and
-`DECISIONS.md` DEC-001 for why, and what unblocks it.
+```bash
+npm run test      # 34 deterministic invariant tests (vitest), no network required
+```
+
+The enforcement mechanism (policy engine, authorization lease, executor,
+receipts, workflow orchestrator, `/api/*` routes) is implemented and
+tested — see `ARCHITECTURE.md`. The Orion credential integration itself
+is blocked on `GATES.md` GATE-001; see `DECISIONS.md` DEC-004 for the
+provider-boundary architecture that lets the rest of the system proceed
+honestly in the meantime.
+
+To run the backend against fixtures locally:
+
+```bash
+HIREWALL_PROVIDER=fixture npm run dev
+```
+
+Then set `NEXT_PUBLIC_HIREWALL_API_URL=http://localhost:3000` in the
+frontend's env to route through the real backend (still fixture-only
+until GATE-001 unblocks Orion). Omitting `HIREWALL_PROVIDER` selects
+`OrionCredentialProvider`, which fails closed — every workflow reports
+`UNVERIFIABLE / DEPENDENCY_UNAVAILABLE` honestly rather than silently
+using fixtures.
 
 ## Evidence / reproduction scripts
 

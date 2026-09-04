@@ -12,8 +12,16 @@
   },
   "orionIntegration": {
     "surface": null,
+    "status": "blocked",
+    "reason": "gate-001",
     "identifiersUsed": [],
     "note": "Blocked on GATE-001 (FAIL as of direct-probe retest 2026-09-04). Every primary-source URL supplied (orionagents.org, /store, /concierge, /docs, /docs/x402, /api/x402/attestation/{id}) returns HTTP 404 with an identical 'app isn't live yet' placeholder on direct request. See GATES.md and DECISIONS.md DEC-002/DEC-003."
+  },
+  "enforcementMechanism": {
+    "status": "implemented, tested, blocked from live Orion evidence",
+    "note": "The provider-agnostic enforcement chain (policy engine, authorization lease, executor no-bypass invariant, receipt integrity) is implemented and covered by 34 passing deterministic tests (npm run test). It runs today against FixtureCredentialProvider only; OrionCredentialProvider fails closed. See DECISIONS.md DEC-004 and ARCHITECTURE.md.",
+    "testCommand": "npm run test",
+    "testCount": 34
   },
   "competition": {
     "deadline": null,

@@ -128,3 +128,64 @@ asserted anywhere in this repo until independently confirmed.
 Reopening condition: unchanged from DEC-001 — the operator supplies a
 confirmed-live Orion URL (sponsor docs, API base, hackathon portal link)
 that this agent can independently request and get a real response from.
+
+---
+
+## DEC-004: continue HIREWALL core behind a provider boundary while Orion credential integration remains blocked
+
+Date: 2026-09-04
+
+Context: GATE-001 is FAIL for the currently supplied Orion surface
+(DEC-003), but Orion itself, the hackathon, and the AgentBound concept are
+independently corroborated — only the exact public attestation API,
+payload schema, signer format, offline verifier, and on-chain contract
+surface are unverifiable while the app is down. Blocking all
+implementation on that outage would waste the time available and would
+also risk the opposite failure mode: silently building assumptions into
+a verifier that later turns out wrong in ways that are expensive to find.
+
+Decision: introduce a strict `CredentialProvider` boundary
+(`src/server/providers`). HIREWALL's enforcement mechanism —
+policy, authorization lease, executor no-bypass invariant, receipts — is
+built and proven now against a `NormalizedCredentialResult` type that
+belongs to HIREWALL, not against a guessed Orion payload shape. Two
+providers implement that interface:
+
+- `FixtureCredentialProvider` — deterministic, dev/test only, every
+  result stamped `evidenceMode: "fixture"` or `"fault_injection"`.
+- `OrionCredentialProvider` — the real integration seam. It is a shell
+  that fails closed with `ORION_PROVIDER_UNAVAILABLE` (mapped to decision
+  `UNVERIFIABLE`, refusal code `DEPENDENCY_UNAVAILABLE`). It encodes no
+  guessed endpoint, schema, signer, TTL, or contract address. Every
+  unresolved field carries a comment pointing at GATE-001.
+
+The core invariant statement changes shape without changing intent, to be
+honest about what is enforced today versus what Orion adds once
+unblocked:
+
+```text
+Today:      No valid HIREWALL authorization lease -> no dispatch through HIREWALL.
+Once Orion
+unblocks:   valid Orion verification + buyer policy -> HIREWALL authorization lease.
+```
+
+This is not a fallback that claims Orion-equivalent functionality. The
+provider selection is explicit server configuration
+(`HIREWALL_PROVIDER` env var, default `orion`, i.e. default behavior is
+honest `UNVERIFIABLE` until an operator explicitly opts into
+`fixture` for local development). It never silently swaps mid-request,
+and the fixture provider can never be selected in what the workflow
+record calls its `evidenceMode: "live"` path — see
+`src/server/providers/index.ts`.
+
+Not affected: the product thesis, the frontend, or any public claim.
+`CLAIMS.md` marks every Orion-dependent claim `BLOCKED_BY_GATE_001`.
+HIREWALL is not submission-ready until GATE-001 resolves — see
+`GATES.md`.
+
+Reopening trigger for re-evaluating this decision: GATE-001 passes or
+conditionally passes, at which point `OrionCredentialProvider` gets its
+real implementation and this decision is marked superseded; or the
+enforcement mechanism proves complete while Orion is still down, at which
+point an explicit Product Re-Lock decision gets made rather than letting
+the outage silently choose the final product.
