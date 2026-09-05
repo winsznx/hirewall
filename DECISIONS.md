@@ -189,3 +189,87 @@ real implementation and this decision is marked superseded; or the
 enforcement mechanism proves complete while Orion is still down, at which
 point an explicit Product Re-Lock decision gets made rather than letting
 the outage silently choose the final product.
+
+---
+
+## DEC-005: durable persistence via local SQLite, repository boundary for a later hosted-database swap
+
+Date: 2026-09-04
+
+Context: the enforcement mechanism from DEC-004 (lease service, executor,
+workflow orchestrator, receipts) was backed by in-memory `Map`s. A
+process restart would silently drop every lease, revocation, consumed
+nonce, and receipt — which weakens exactly the enforcement properties
+`CLAIMS.md` describes as tested, without changing what the tests report.
+This was flagged as the most important correctness gap and prioritized
+above new feature breadth.
+
+Decision: introduce a repository boundary
+(`src/server/persistence/{lease,workflow,receipt,execution}-repo.ts`)
+backed by Node's built-in `node:sqlite` (`DatabaseSync`, stable since
+Node 22.5, this repo runs Node 24 — no native dependency to install).
+`lease-store.ts`, `workflow/store.ts`, and `receipt-service.ts` now
+delegate to these repos instead of holding Maps directly; their public
+function signatures are unchanged, so no caller above them needed to
+change.
+
+Local durable path chosen over an immediate hosted database because the
+operator's instruction was explicit: finish the repository abstraction,
+schema, and local durable path first, and request a hosted-database
+credential only when actually deploying. A hosted Postgres (via the
+Vercel Marketplace, per this session's Vercel plugin guidance) is the
+natural next step for a horizontally-scaled deployment — SQLite-on-local-
+disk does not survive a serverless platform's ephemeral, per-instance
+filesystem. That limitation is recorded honestly in `ARCHITECTURE.md`
+and `SECURITY.md` rather than glossed over. The swap only requires a new
+implementation of the same four repository interfaces; nothing above the
+boundary (lease-service, executor, orchestrator) changes.
+
+Atomicity: the `validate lease -> consume/lock authorization -> begin
+execution` sequence is the one place a race could allow duplicate
+execution. Two mechanisms enforce it: `consumed_nonces.nonce` is a
+PRIMARY KEY (a second `consumeNonce()` for the same nonce fails the
+INSERT rather than silently succeeding twice), and `executions.leaseId`
+is a PRIMARY KEY that the executor claims via `INSERT` before ever
+calling the payment transport — a second concurrent `dispatch()` call for
+the same lease loses that INSERT race and returns `REPLAY_REJECTED`
+without reaching the transport. This holds even across two Node
+processes sharing the same SQLite file (SQLite's own file-level locking
+enforces it), which is the closest available proxy for two serverless
+instances sharing a real hosted database later.
+
+Verified, not just written: `src/server/__tests__/persistence-restart.test.ts`
+(8 tests) simulates a process restart by closing and reopening the SQLite
+connection against the same file and asserts a valid lease stays valid,
+an expired lease stays expired, a revoked lease stays revoked, a consumed
+lease cannot be replayed, a duplicate execute request cannot create a
+second execution, a receipt remains retrievable and independently
+verifiable, an `EXECUTION_UNKNOWN` result is never blindly retried, and
+`fault_injection`/`fixture` evidence mode is never upgraded to `live` on
+reread. Additionally smoke-tested against the actual compiled production
+build (`npm run build && npm run start`), not just the in-process test
+suite: created a workflow, killed the server process, started a fresh
+one pointed at the same `.sqlite` file, and confirmed the workflow and
+its `AUTHORIZE` decision were still there.
+
+Build-tooling note: `node:sqlite` is loaded via
+`createRequire(process.cwd() + "/")(...)` rather than a static
+`import ... from "node:sqlite"`. This repo's two build tools disagree on
+how to resolve that newer Node builtin — Turbopack (`next build`) handles
+a static import correctly, but the Vite version vitest currently bundles
+predates `node:sqlite` in its builtin-module list and misresolves a
+static import as an npm package named "sqlite" (which doesn't exist).
+`createRequire(import.meta.url)` fixes vitest but trips Turbopack's
+bundling analysis ("Unsupported external type Url"); `createRequire(process.cwd() + "/")`
+works in both, verified by running the full vitest suite and a clean
+`next build` after the change. Ambient types for the subset of the
+`node:sqlite` API actually used are declared in
+`src/types/node-sqlite.d.ts` because `@types/node@20` (pinned for
+`vitest@2` peer compatibility) doesn't ship them yet.
+
+Reopening trigger: production deployment on a horizontally-scaled host,
+at which point a Postgres-backed implementation of the same four
+repository interfaces replaces the SQLite one — see `SETUP.md` for the
+minimum credential that will be requested at that point, and
+`ARCHITECTURE.md` for the documented limitation this decision does not
+hide.

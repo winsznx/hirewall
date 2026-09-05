@@ -57,6 +57,16 @@ Limitations: the verifier's "Orion credential verification" check always reports
 Reproduction: npm run test
 ```
 
+```text
+Claim: authorization lease, revocation, replay/nonce, execution, and receipt state survive a process restart
+Artifact: src/server/persistence/ (SQLite-backed repositories)
+Evidence path: src/server/__tests__/persistence-restart.test.ts (8 passing tests)
+Evidence class: deterministic
+Denominator: n/a
+Limitations: verified for a single-instance restart against a local SQLite file. Does not establish behavior across multiple concurrent serverless instances sharing a real hosted database — that requires the Postgres-backed repository implementation described in DECISIONS.md DEC-005, not yet built.
+Reproduction: npm run test; or, for a real compiled-server smoke test: npm run build && HIREWALL_PROVIDER=fixture HIREWALL_DB_PATH=./.data/x.sqlite npm run start, create a workflow, kill and restart the process, re-fetch it.
+```
+
 ---
 
 ## Template

@@ -18,15 +18,15 @@ exists. See `src/lib/api/remote-api.ts` for the integration seam.
 ## Backend
 
 ```bash
-npm run test      # 34 deterministic invariant tests (vitest), no network required
+npm run test      # 42 deterministic invariant tests (vitest), no network required
 ```
 
 The enforcement mechanism (policy engine, authorization lease, executor,
-receipts, workflow orchestrator, `/api/*` routes) is implemented and
-tested — see `ARCHITECTURE.md`. The Orion credential integration itself
-is blocked on `GATES.md` GATE-001; see `DECISIONS.md` DEC-004 for the
-provider-boundary architecture that lets the rest of the system proceed
-honestly in the meantime.
+receipts, workflow orchestrator, `/api/*` routes) is implemented, durable,
+and tested — see `ARCHITECTURE.md`. The Orion credential integration
+itself is blocked on `GATES.md` GATE-001; see `DECISIONS.md` DEC-004 for
+the provider-boundary architecture that lets the rest of the system
+proceed honestly in the meantime.
 
 To run the backend against fixtures locally:
 
@@ -40,6 +40,23 @@ until GATE-001 unblocks Orion). Omitting `HIREWALL_PROVIDER` selects
 `OrionCredentialProvider`, which fails closed — every workflow reports
 `UNVERIFIABLE / DEPENDENCY_UNAVAILABLE` honestly rather than silently
 using fixtures.
+
+### Persistence
+
+State (leases, revocation, replay nonces, executions, workflows,
+receipts) is durable via `node:sqlite` — see `ARCHITECTURE.md` and
+`DECISIONS.md` DEC-005. Controlled by:
+
+```bash
+HIREWALL_DB_PATH=./.data/hirewall.sqlite   # default; ":memory:" is used automatically in tests
+```
+
+The `.data/` directory is gitignored — delete it to reset all local
+state. **Not yet needed, and will only be requested when actually
+deploying**: a hosted Postgres connection string (e.g. via the Vercel
+Marketplace), required only for a horizontally-scaled deployment where a
+local SQLite file can't be shared across serverless instances. That swap
+touches only `src/server/persistence/`.
 
 ## Evidence / reproduction scripts
 

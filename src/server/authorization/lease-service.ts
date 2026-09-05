@@ -86,11 +86,17 @@ export function validateLease(leaseId: string, request: DispatchRequest, now: st
   return { ok: true };
 }
 
-export function consumeLease(leaseId: string, consumedAt: string): void {
+// Returns false if the nonce was already consumed by a concurrent
+// caller — the executor's actual atomicity boundary is the executions
+// table claim (see executor.ts), but this return value lets any other
+// caller detect the same race honestly rather than silently succeeding.
+export function consumeLease(leaseId: string, consumedAt: string): boolean {
   const lease = leaseStore.get(leaseId);
-  if (!lease) return;
-  leaseStore.consumeNonce(lease.nonce);
+  if (!lease) return false;
+  const claimed = leaseStore.consumeNonce(lease.nonce, consumedAt);
+  if (!claimed) return false;
   leaseStore.markConsumed(leaseId, consumedAt);
+  return true;
 }
 
 export function revokeLease(leaseId: string): void {

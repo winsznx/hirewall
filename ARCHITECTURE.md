@@ -80,26 +80,42 @@ This matches `HIREWALL_PRD.md` section 11's recommended
     engine.ts                 evaluatePolicy() — pure function of BuyerPolicy + NormalizedCredentialResult
 
   /authorization
-    lease-store.ts            in-memory source of truth for lease/nonce state
+    lease-store.ts            durable (SQLite-backed) source of truth for lease/nonce state
     lease-service.ts           createLease(), validateLease(), consumeLease(), revokeLease()
 
   /executor
     executor.ts                Executor — one public method (dispatch), always
-                                revalidates against the lease store, injectable
-                                payment transport (defaults to honest "unavailable")
+                                revalidates against the lease store, atomically
+                                claims execution via persistence/execution-repo.ts
+                                before touching the transport, injectable payment
+                                transport (defaults to honest "unavailable")
 
   /receipts
     receipt-types.ts            HirewallReceipt schema (matches PRD section 12.9)
-    receipt-service.ts           buildReceipt()/getReceipt(), in-memory store
+    receipt-service.ts           buildReceipt()/getReceipt(), durable (SQLite-backed) store
     verifier.ts                   verifyReceipt() — recomputes, never trusts decision field
 
   /workflow
-    store.ts                    in-memory WorkflowRecord store
+    store.ts                    durable (SQLite-backed) WorkflowRecord store
     orchestrator.ts               createWorkflow()/executeWorkflow() — the only place
                                    provider -> policy -> lease -> executor -> receipt
-                                   are wired together
+                                   are wired together; persists on every event via
+                                   pushEvent() so no mutation path is un-persisted
 
-  /__tests__                    34 passing vitest invariant tests (npm run test)
+  /persistence                  repository boundary — see DECISIONS.md DEC-005
+    db.ts                        node:sqlite connection + migrations, singleton
+                                  keyed by HIREWALL_DB_PATH (default
+                                  ./.data/hirewall.sqlite, ":memory:" in tests)
+    lease-repo.ts                  leases, revocation, consumed_nonces (PRIMARY KEY
+                                    on nonce — atomic double-consume prevention)
+    execution-repo.ts               executions (PRIMARY KEY on leaseId — atomic
+                                     duplicate-execution prevention, claimed before
+                                     the payment transport is ever called)
+    workflow-repo.ts                 workflows, stored as a JSON blob keyed by id
+    receipt-repo.ts                   receipts, stored as a JSON blob keyed by receiptId
+
+  /__tests__                    42 passing vitest invariant tests (npm run test),
+                                 including 8 process-restart-survival tests
 
 /src/app/api
   dispatch/route.ts                        POST — create workflow
@@ -133,8 +149,16 @@ buyer intent
 - Real x402 payment transport — `Executor`'s default transport honestly
   returns `NOT_ATTEMPTED`/`DEPENDENCY_UNAVAILABLE`; a real transport can
   be injected via its constructor once a real endpoint exists.
-- Durable persistence — workflow/lease/receipt stores are in-memory
-  (`Map`), matching the PRD's table shapes closely enough to swap later.
+- Durable persistence — implemented via `node:sqlite` (see
+  `src/server/persistence/` and DECISIONS.md DEC-005). Survives a process
+  restart, verified by 8 tests and a smoke test against the actual
+  compiled production server. **Known limitation, not hidden**: a local
+  SQLite file does not survive a horizontally-scaled serverless
+  deployment's ephemeral, per-instance filesystem — production deployment
+  on a host like Vercel needs a real hosted database (Postgres via the
+  Vercel Marketplace is the natural fit) implementing the same four
+  repository interfaces. That swap is scoped to `/src/server/persistence`
+  only; nothing above the repository boundary changes.
 - Catalog experiment runner — requires a live Orion Store cohort, blocked
   on GATE-001; `getLatestCatalogRun()` honestly returns `null` in
   `RemoteHirewallApi`.

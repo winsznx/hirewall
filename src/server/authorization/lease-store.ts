@@ -1,37 +1,36 @@
+import { leaseRepo } from "../persistence/lease-repo";
 import type { AuthorizationLease } from "../types";
 
-// Source of truth for lease state. The executor must look leases up here
-// by ID rather than trusting a caller-supplied lease object — this is
-// what makes the no-bypass invariant enforceable rather than advisory.
-// In-memory for now; swap for real persistence without changing callers.
+// Durable-backed. This module used to hold an in-memory Map; it now
+// delegates to src/server/persistence/lease-repo.ts (SQLite) so lease,
+// revocation, and nonce-consumption state survive a process restart.
+// See DECISIONS.md DEC-005.
 class LeaseStore {
-  private readonly leases = new Map<string, AuthorizationLease>();
-  private readonly consumedNonces = new Set<string>();
-
   put(lease: AuthorizationLease): void {
-    this.leases.set(lease.id, lease);
+    leaseRepo.put(lease);
   }
 
   get(id: string): AuthorizationLease | undefined {
-    return this.leases.get(id);
+    return leaseRepo.get(id);
   }
 
   revoke(id: string): void {
-    const lease = this.leases.get(id);
-    if (lease) lease.revoked = true;
+    leaseRepo.revoke(id);
   }
 
   isNonceConsumed(nonce: string): boolean {
-    return this.consumedNonces.has(nonce);
+    return leaseRepo.isNonceConsumed(nonce);
   }
 
-  consumeNonce(nonce: string): void {
-    this.consumedNonces.add(nonce);
+  // Returns whether this call was the one that consumed the nonce.
+  // false means someone already consumed it — callers must treat that as
+  // a replay rather than proceeding.
+  consumeNonce(nonce: string, consumedAt: string): boolean {
+    return leaseRepo.consumeNonce(nonce, consumedAt);
   }
 
   markConsumed(id: string, consumedAt: string): void {
-    const lease = this.leases.get(id);
-    if (lease) lease.consumedAt = consumedAt;
+    leaseRepo.markConsumed(id, consumedAt);
   }
 }
 

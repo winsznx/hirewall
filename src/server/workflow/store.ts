@@ -1,17 +1,15 @@
+import { workflowRepo } from "../persistence/workflow-repo";
 import type { WorkflowRecord } from "../types";
 
-// In-memory workflow persistence. Matches the `workflows` table shape
-// from HIREWALL_PRD.md section 15 closely enough to swap in a real store
-// later without changing orchestrator.ts's calls.
+// Durable-backed — see src/server/persistence/workflow-repo.ts (SQLite)
+// and DECISIONS.md DEC-005. Workflow state survives a process restart.
 class WorkflowStore {
-  private readonly workflows = new Map<string, WorkflowRecord>();
-
   put(workflow: WorkflowRecord): void {
-    this.workflows.set(workflow.id, workflow);
+    workflowRepo.put(workflow);
   }
 
   get(id: string): WorkflowRecord | undefined {
-    return this.workflows.get(id);
+    return workflowRepo.get(id);
   }
 }
 

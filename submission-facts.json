@@ -18,10 +18,15 @@
     "note": "Blocked on GATE-001 (FAIL as of direct-probe retest 2026-09-04). Every primary-source URL supplied (orionagents.org, /store, /concierge, /docs, /docs/x402, /api/x402/attestation/{id}) returns HTTP 404 with an identical 'app isn't live yet' placeholder on direct request. See GATES.md and DECISIONS.md DEC-002/DEC-003."
   },
   "enforcementMechanism": {
-    "status": "implemented, tested, blocked from live Orion evidence",
-    "note": "The provider-agnostic enforcement chain (policy engine, authorization lease, executor no-bypass invariant, receipt integrity) is implemented and covered by 34 passing deterministic tests (npm run test). It runs today against FixtureCredentialProvider only; OrionCredentialProvider fails closed. See DECISIONS.md DEC-004 and ARCHITECTURE.md.",
+    "status": "implemented, tested, durable, blocked from live Orion evidence",
+    "note": "The provider-agnostic enforcement chain (policy engine, authorization lease, executor no-bypass/no-replay invariant, receipt integrity) is implemented, backed by durable SQLite persistence (survives a process restart, DECISIONS.md DEC-005), and covered by 42 passing deterministic tests (npm run test) including 8 restart-survival tests. It runs today against FixtureCredentialProvider only; OrionCredentialProvider fails closed. See DECISIONS.md DEC-004/DEC-005 and ARCHITECTURE.md.",
     "testCommand": "npm run test",
-    "testCount": 34
+    "testCount": 42,
+    "durability": {
+      "status": "local durable path implemented (SQLite via node:sqlite)",
+      "limitation": "does not survive a horizontally-scaled serverless deployment's ephemeral per-instance filesystem; a hosted database is required before multi-instance production deployment",
+      "verifiedBy": "8 process-restart tests plus a smoke test against the compiled production server (npm run build && npm run start), not just the in-process test suite"
+    }
   },
   "competition": {
     "deadline": null,

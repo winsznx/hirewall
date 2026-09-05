@@ -23,6 +23,11 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
+// Persists the workflow every time it's called. Every mutation path in
+// this file sets its fields immediately before calling pushEvent(), so
+// this is the single point that keeps the durable record consistent with
+// in-memory state — there is no mutation path that skips it. See
+// DECISIONS.md DEC-005.
 function pushEvent(workflow: WorkflowRecord, type: string, data: Record<string, unknown>, candidateId?: string): void {
   workflow.events.push({
     seq: workflow.events.length + 1,
@@ -32,6 +37,7 @@ function pushEvent(workflow: WorkflowRecord, type: string, data: Record<string, 
     data,
   });
   workflow.updatedAt = nowIso();
+  workflowStore.put(workflow);
 }
 
 function defaultPolicy(chainId: number, maxSpend: string): BuyerPolicy {

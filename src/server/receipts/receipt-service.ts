@@ -1,11 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { hashObject } from "../policy/hash";
+import { receiptRepo } from "../persistence/receipt-repo";
 import type { HirewallReceipt, ReceiptInputForBuild } from "./receipt-types";
 
 export const VERIFIER_VERSION = "0.1.0";
 export const POLICY_VERSION = "0.1.0";
-
-const receiptStore = new Map<string, HirewallReceipt>();
 
 export function buildReceipt(input: ReceiptInputForBuild): HirewallReceipt {
   const createdAt = input.createdAt ?? new Date().toISOString();
@@ -17,10 +16,10 @@ export function buildReceipt(input: ReceiptInputForBuild): HirewallReceipt {
   };
   const receiptHash = hashObject(withoutHash);
   const receipt: HirewallReceipt = { ...withoutHash, receiptHash };
-  receiptStore.set(receipt.receiptId, receipt);
+  receiptRepo.put(receipt);
   return receipt;
 }
 
 export function getReceipt(receiptId: string): HirewallReceipt | undefined {
-  return receiptStore.get(receiptId);
+  return receiptRepo.get(receiptId);
 }
