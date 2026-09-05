@@ -67,6 +67,16 @@ Limitations: verified for a single-instance restart against a local SQLite file.
 Reproduction: npm run test; or, for a real compiled-server smoke test: npm run build && HIREWALL_PROVIDER=fixture HIREWALL_DB_PATH=./.data/x.sqlite npm run start, create a workflow, kill and restart the process, re-fetch it.
 ```
 
+```text
+Claim: a HIREWALL receipt can be independently verified offline, without the LLM, a funded wallet, private developer state, or trusting the application's own stored result
+Artifact: scripts/verify-receipt.ts (calls the same verifyReceipt() the /api/verify-receipt route uses — no separate CLI-only verification logic)
+Evidence path: src/server/__tests__/receipt-verifier.test.ts (13 tests, including 8 tamper vectors: amount, target, policy hash, credential-result hash, context, settlement data, evidence mode, receipt hash itself — every one detected via hash recomputation, none silently accepted)
+Evidence class: deterministic
+Denominator: n/a
+Limitations: verifies HIREWALL-owned claims only; the "Orion credential verification" line always reports NOT_CLAIMED regardless of provider, per GATES.md.
+Reproduction: npm run verify:receipt -- <path|url|-> (also accepts a receipt fetched from a running instance's own API, e.g. .../api/receipts/<id>?format=raw); npm run test for the tamper-vector suite.
+```
+
 ---
 
 ## Template

@@ -162,6 +162,7 @@ buyer intent
 - Catalog experiment runner — requires a live Orion Store cohort, blocked
   on GATE-001; `getLatestCatalogRun()` honestly returns `null` in
   `RemoteHirewallApi`.
-- `pnpm verify:receipt` CLI and other `/scripts` — the logic exists
-  (`verifyReceipt()`) but isn't exposed as a standalone script yet.
+- `scripts/verify-receipt.ts` implemented (`npm run verify:receipt -- <path|url|->`).
+  Other `/scripts` from `HIREWALL_PRD.md` section 25 (`evidence:*`
+  commands) not yet built — those depend on the catalog runner.
 - CI workflow — not yet added.

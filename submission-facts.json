@@ -47,7 +47,10 @@
   },
   "liveTransactions": [],
   "publicReceiptIds": [],
-  "reproductionCommands": [],
+  "reproductionCommands": [
+    "npm run test",
+    "npm run verify:receipt -- <path|url|->"
+  ],
   "evidenceClassification": {
     "live": [],
     "fixture": ["all frontend fixture scenarios listed in HIREWALL_FRONTEND_HANDOFF.md section 28"],

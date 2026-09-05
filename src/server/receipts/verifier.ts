@@ -14,7 +14,7 @@ export interface ReceiptVerificationOutcome {
   checks: VerificationCheckResult[];
   decision: HirewallReceipt["decision"];
   evidenceMode: HirewallReceipt["evidenceMode"];
-  orionCredentialVerification: "NOT_CLAIMED" | "VERIFIED" | "REFUSED" | "UNVERIFIABLE";
+  orionCredentialVerification: "NOT_CLAIMED";
 }
 
 // Recomputes every check the receipt schema permits us to recompute. It
@@ -87,11 +87,12 @@ export function verifyReceipt(receipt: HirewallReceipt): ReceiptVerificationOutc
       : "NOT_CLAIMED",
   });
 
-  // 6. Orion-specific credential verification — this is the check that
-  // is honestly NOT_CLAIMED until GATE-001 passes. See DECISIONS.md
-  // DEC-004 and GATES.md.
-  const orionCredentialVerification =
-    receipt.provider.providerId === "orion" ? "NOT_CLAIMED" : receipt.verification.status;
+  // 6. Orion-specific credential verification — always NOT_CLAIMED. This
+  // field asks specifically about Orion, not about whatever provider
+  // actually ran (a fixture "VERIFIED" status is not an Orion claim and
+  // must never be reported under this name) — see DECISIONS.md DEC-004
+  // and GATES.md.
+  const orionCredentialVerification = "NOT_CLAIMED" as const;
 
   checks.push({
     id: "orion_credential_verification",

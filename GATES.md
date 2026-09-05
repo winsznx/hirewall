@@ -93,24 +93,38 @@ real attestation artifact or a real Orion API surface to test against:
 
 2. Reference/offline verifier parity — blocked, no reference verifier located.
 3. AgentBound/onchain identity binding — blocked, no verified contract address.
-4. One-byte signature/payload tamper rejection — buildable today as a
-   fixture-only deterministic test (no live dependency), see below.
-5. Expiry rejection — same, fixture-only buildable today.
-6. Wrong-wallet rejection — same, fixture-only buildable today.
-7. No-bypass executor test — buildable today against the executor's own
-   interface regardless of Orion specifics (see `DECISIONS.md` DEC-002).
+4. One-byte signature/payload tamper rejection — DONE (fixture-only
+   deterministic), `src/server/__tests__/policy-and-provider.test.ts`.
+5. Expiry rejection — DONE, `lease-executor-invariants.test.ts`,
+   `workflow-orchestrator.test.ts`, `persistence-restart.test.ts`.
+6. Wrong-wallet rejection — DONE, `lease-executor-invariants.test.ts`.
+7. No-bypass executor test — DONE, `lease-executor-invariants.test.ts`
+   (executor has exactly one public method; replay/duplicate-execution
+   proven both sequentially and across a simulated process restart —
+   see `DECISIONS.md` DEC-004/DEC-005).
 8. Live x402 paid dispatch — blocked, requires funded wallet + real endpoint.
 9. Frozen Store/catalog experiment — blocked, no catalog surface located.
-10. Credential-free Proof Lab — partially buildable today using fixtures
-    (frontend already has this); production wiring blocked.
-11. Clean-room reproduction — buildable for the fixture/deterministic path today.
-12. Public receipt verification — buildable for the fixture/deterministic path today.
+10. Credential-free Proof Lab — partially DONE: `/api/proof-lab/run`
+    implements the HIREWALL-owned scenarios (valid/expired/wallet-
+    mismatch/unavailable/replay/receipt-tamper) against the production
+    verifier/policy/lease/executor code, per explicit instruction not to
+    simulate Orion-specific signature/signer tamper. Frontend wiring for
+    the live backend not yet done (still fixture-only in the UI).
+11. Clean-room reproduction — DONE for the fixture/deterministic path:
+    `npm install && npm run test` requires no network and no local state.
+12. Public receipt verification — DONE: `npm run verify:receipt -- <path|url|->`
+    (`scripts/verify-receipt.ts`) recomputes from the receipt artifact
+    alone, no LLM/wallet/database required, calling the same
+    `verifyReceipt()` the `/api/verify-receipt` route uses. 13 tamper-
+    vector tests (amount, target, policy hash, credential-result hash,
+    context, settlement data, evidence mode, receipt hash itself) all
+    correctly detected via hash recomputation.
 13. Sponsor repository/contribution inspection — blocked, no sponsor repo located.
 14. Judge-path acceptance test — partially buildable (fixture path only).
 15. `submission-facts.json` freeze — cannot freeze real numbers; skeleton created with all fields marked unresolved.
 
-Gates 4, 5, 6, 7, 11, 12 do not require a live Orion dependency — they test
-the deterministic verifier/policy/lease/executor logic in isolation using
-fixture attestations we control. These can and should proceed while
-GATE-001 is being unblocked, per `BUILD_CONTRACT.md` section 6 (a separate
-explicitly labeled deterministic fixture path is allowed).
+Gates 4, 5, 6, 7, 11, 12 do not require a live Orion dependency and are
+now implemented and tested — see `ARCHITECTURE.md` and `CLAIMS.md`. Gate
+10 is partially done. This is exactly the `BUILD_CONTRACT.md` section 6
+carve-out (a separate explicitly labeled deterministic fixture path)
+being exercised while GATE-001 stays blocked.

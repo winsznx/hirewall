@@ -95,3 +95,55 @@ describe("receipt verifier recomputation", () => {
     expect(outcome.integrityOk).toBe(false);
   });
 });
+
+// Required tamper vectors — BUILD_CONTRACT.md section 17 / operator
+// instruction: "every material mutation should either invalidate the
+// receipt or produce the exact documented limitation." Every mutation
+// below is applied post-issuance, the same way a malicious actor editing
+// a stored/transmitted receipt would, and must be caught by the receipt
+// hash recomputation rather than any field-specific check.
+describe("receipt verifier tamper vectors", () => {
+  function issuedReceipt() {
+    return buildReceipt(
+      baseInput({
+        decision: "AUTHORIZE",
+        authorization: {
+          id: "lease_tamper",
+          contextId: "ctx_1",
+          candidateId: "cand_1",
+          maxAmountAtomic: "100000",
+          chainId: 8453,
+          credentialResultHash: "0xcred",
+          policyHash: "0xabc",
+          issuedAt: "2026-09-04T12:00:00.000Z",
+          expiresAt: "2026-09-04T12:20:00.000Z",
+          nonce: "nonce_tamper",
+          revoked: false,
+        },
+      })
+    );
+  }
+
+  it.each([
+    ["amount", (r: ReturnType<typeof issuedReceipt>) => ({ ...r, authorization: { ...r.authorization!, maxAmountAtomic: "999999999" } })],
+    ["target/candidate", (r: ReturnType<typeof issuedReceipt>) => ({ ...r, candidate: { ...r.candidate, id: "cand_other" } })],
+    ["policy hash", (r: ReturnType<typeof issuedReceipt>) => ({ ...r, policy: { ...r.policy, policyHash: "0xdifferent" } })],
+    [
+      "credential-result hash",
+      (r: ReturnType<typeof issuedReceipt>) => ({ ...r, authorization: { ...r.authorization!, credentialResultHash: "0xdifferent" } }),
+    ],
+    ["context", (r: ReturnType<typeof issuedReceipt>) => ({ ...r, request: { ...r.request, contextId: "ctx_other" } })],
+    ["settlement data", (r: ReturnType<typeof issuedReceipt>) => ({ ...r, execution: { state: "SUCCEEDED" as const, transactionHash: "0xfake" } })],
+    ["evidence mode", (r: ReturnType<typeof issuedReceipt>) => ({ ...r, evidenceMode: "live" as const })],
+    ["receipt hash itself", (r: ReturnType<typeof issuedReceipt>) => ({ ...r, receiptHash: "0xforged" })],
+  ])("mutating %s is detected, not silently accepted", (_label, mutate) => {
+    const receipt = issuedReceipt();
+    const tampered = mutate(receipt);
+
+    const outcome = verifyReceipt(tampered);
+    const hashCheck = outcome.checks.find((c) => c.id === "receipt_hash");
+
+    expect(hashCheck?.status).toBe("FAIL");
+    expect(outcome.integrityOk).toBe(false);
+  });
+});
