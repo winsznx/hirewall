@@ -44,3 +44,7 @@ next-env.d.ts
 # Vercel Marketplace installed local agent guidance
 .agents/
 skills-lock.json
+
+# working notes not part of the judge-facing submission (BUILD_CONTRACT.md
+# section 19 lists exactly what belongs at repo root instead)
+/internal/
