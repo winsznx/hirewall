@@ -15,6 +15,8 @@ export interface CreateWorkflowInput {
   chainId: number;
   workerIdentifier?: string;
   allowFallback: boolean;
+  mode?: "find" | "check";
+  category?: string;
 }
 
 const SOFTWARE_COMMIT = process.env.HIREWALL_COMMIT ?? "unknown";
@@ -87,7 +89,31 @@ export async function createWorkflow(
   workflowStore.put(workflow);
   pushEvent(workflow, "workflow.created", { task: input.task });
 
-  await runCandidate(workflow, provider, input.workerIdentifier ?? "fixture-valid");
+  let candidateInputs: string[];
+  if (input.workerIdentifier) {
+    candidateInputs = [input.workerIdentifier];
+  } else if (input.mode === "find" && provider.matchCandidates) {
+    try {
+      const matches = await provider.matchCandidates(input.task, input.category);
+      candidateInputs = matches.map((candidate) => candidate.slug ?? candidate.id);
+      pushEvent(workflow, "candidates.matched", { count: candidateInputs.length, category: input.category });
+    } catch (error) {
+      finalizeUnverifiable(workflow, "DEPENDENCY_UNAVAILABLE", describeProviderError(error));
+      return workflow;
+    }
+  } else {
+    candidateInputs = [];
+  }
+
+  if (candidateInputs.length === 0) {
+    finalizeUnverifiable(workflow, "DEPENDENCY_UNAVAILABLE", "No matching Orion candidate was available.");
+    return workflow;
+  }
+  const toTry = input.allowFallback && input.mode === "find" ? candidateInputs.slice(0, 5) : candidateInputs.slice(0, 1);
+  for (let index = 0; index < toTry.length; index++) {
+    const authorized = await runCandidate(workflow, provider, toTry[index], index < toTry.length - 1);
+    if (authorized) break;
+  }
 
   return workflow;
 }
@@ -95,15 +121,18 @@ export async function createWorkflow(
 async function runCandidate(
   workflow: WorkflowRecord,
   provider: CredentialProvider<never>,
-  candidateInput: string
-): Promise<void> {
+  candidateInput: string,
+  deferFailure = false
+): Promise<boolean> {
   let candidate: ResolvedCandidate;
 
   try {
     candidate = await provider.resolveCandidate({ slug: candidateInput } as never);
   } catch (err) {
-    finalizeUnverifiable(workflow, "DEPENDENCY_UNAVAILABLE", describeProviderError(err));
-    return;
+    if (deferFailure) {
+      pushEvent(workflow, "candidate.unavailable", { input: candidateInput, detail: describeProviderError(err) });
+    } else finalizeUnverifiable(workflow, "DEPENDENCY_UNAVAILABLE", describeProviderError(err));
+    return false;
   }
 
   workflow.candidate = candidate;
@@ -111,6 +140,7 @@ async function runCandidate(
   pushEvent(workflow, "candidate.resolved", { candidate }, candidate.id);
 
   const context = { contextId: workflow.contextId, chainId: workflow.request.chainId, requestedAt: nowIso() };
+  workflow.policyResult = undefined;
 
   try {
     const credential = await provider.verifyCandidate(candidate, context);
@@ -118,8 +148,11 @@ async function runCandidate(
     pushEvent(workflow, "verification.result", { status: credential.status }, candidate.id);
 
     if (credential.status === "UNVERIFIABLE") {
-      finalizeUnverifiable(workflow, credential.refusalCode ?? "DEPENDENCY_UNAVAILABLE", "provider returned UNVERIFIABLE");
-      return;
+      const code = credential.refusalCode ?? "DEPENDENCY_UNAVAILABLE";
+      workflow.attemptedCandidates.push({ candidate, decision: "UNVERIFIABLE", refusalCode: code });
+      if (deferFailure) pushEvent(workflow, "candidate.unverifiable", { code }, candidate.id);
+      else finalizeUnverifiable(workflow, code, "provider returned UNVERIFIABLE");
+      return false;
     }
 
     workflow.state = "POLICY_EVALUATING";
@@ -128,8 +161,12 @@ async function runCandidate(
     pushEvent(workflow, "policy.evaluated", { ok: policyResult.ok, failureCode: policyResult.failureCode }, candidate.id);
 
     if (!policyResult.ok) {
-      finalizeRefuse(workflow, policyResult.failureCode ?? "POLICY_REJECTED", candidate);
-      return;
+      const code = policyResult.failureCode ?? "POLICY_REJECTED";
+      if (deferFailure) {
+        workflow.attemptedCandidates.push({ candidate, decision: "REFUSE", refusalCode: code });
+        pushEvent(workflow, "candidate.refused", { code }, candidate.id);
+      } else finalizeRefuse(workflow, code, candidate);
+      return false;
     }
 
     const credentialResultHash = hashObject(credential);
@@ -151,8 +188,13 @@ async function runCandidate(
     pushEvent(workflow, "authorization.created", { leaseId: lease.id, expiresAt: lease.expiresAt }, candidate.id);
 
     emitReceipt(workflow);
+    return true;
   } catch (err) {
-    finalizeUnverifiable(workflow, "DEPENDENCY_UNAVAILABLE", describeProviderError(err));
+    if (deferFailure) {
+      workflow.attemptedCandidates.push({ candidate, decision: "UNVERIFIABLE", refusalCode: "DEPENDENCY_UNAVAILABLE" });
+      pushEvent(workflow, "candidate.unavailable", { detail: describeProviderError(err) }, candidate.id);
+    } else finalizeUnverifiable(workflow, "DEPENDENCY_UNAVAILABLE", describeProviderError(err));
+    return false;
   }
 }
 

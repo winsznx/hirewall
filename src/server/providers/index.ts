@@ -12,6 +12,9 @@ export function selectProvider(): { provider: CredentialProvider<never>; evidenc
   const configured = process.env.HIREWALL_PROVIDER;
 
   if (configured === "fixture") {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("HIREWALL_PROVIDER=fixture is development-only; production dispatch must fail closed.");
+    }
     return {
       provider: new FixtureCredentialProvider() as unknown as CredentialProvider<never>,
       evidenceMode: "fixture",

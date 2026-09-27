@@ -15,6 +15,8 @@ export async function POST(request: Request) {
       chainId: body.chainId ?? 8453,
       workerIdentifier: body.target ?? body.workerIdentifier,
       allowFallback: body.allowFallback ?? false,
+      mode: body.mode,
+      category: body.category,
     },
     provider,
     evidenceMode

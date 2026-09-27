@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0",
-  "status": "incomplete — GATE-001 not yet passed, see GATES.md",
+  "status": "incomplete — GATE-001-R2 conditionally passed for onchain identity only",
   "canonicalOneLiner": "No valid AgentBound authorization, no dispatch through HIREWALL.",
   "deploymentUrls": {
     "web": null,
@@ -8,20 +8,20 @@
   },
   "network": {
     "chain": "Base",
-    "chainId": null
+    "chainId": 8453
   },
   "orionIntegration": {
-    "surface": null,
-    "status": "blocked",
-    "reason": "gate-001",
-    "identifiersUsed": [],
-    "note": "Blocked on GATE-001 (FAIL as of direct-probe retest 2026-09-04). Every primary-source URL supplied (orionagents.org, /store, /concierge, /docs, /docs/x402, /api/x402/attestation/{id}) returns HTTP 404 with an identical 'app isn't live yet' placeholder on direct request. See GATES.md and DECISIONS.md DEC-002/DEC-003."
+    "surface": "public Store API, x402 info API, and AgentBound Base registry",
+    "status": "partial — live contract and candidate state observed; signed credential not retrieved",
+    "reason": "gate-001-r2",
+    "identifiersUsed": ["rigel (Store ID 16)", "audit (Store ID 18)"],
+    "note": "The public Orion application is restored. Independent Base reads confirm AgentBound tokens for Rigel and AUDIT, contract 0xb006ca09e390eb3082bb3cb0b43e788ebc6e76a0, and oracle 0x7cDd6Ea617c4F5F1c9a5128D2940c72e1A2E4900. Their signed attestation endpoints currently return 404. See GATE-001-R2 and evidence/campaign/gate-001-r2/."
   },
   "enforcementMechanism": {
     "status": "implemented, tested, durable, blocked from live Orion evidence",
-    "note": "The provider-agnostic enforcement chain (policy engine, authorization lease, executor no-bypass/no-replay invariant, receipt integrity) is implemented, backed by durable SQLite persistence (survives a process restart, DECISIONS.md DEC-005), and covered by 42 passing deterministic tests (npm run test) including 8 restart-survival tests. It runs today against FixtureCredentialProvider only; OrionCredentialProvider fails closed. See DECISIONS.md DEC-004/DEC-005 and ARCHITECTURE.md.",
+    "note": "The enforcement chain is implemented with SQLite persistence and 54 passing deterministic tests. The Orion provider resolves real Store agents and verifies Base AgentBound plus signed EIP-191 attestations; sampled live agents have no retrievable signed attestation, so no live authorization has been produced.",
     "testCommand": "npm run test",
-    "testCount": 42,
+    "testCount": 54,
     "durability": {
       "status": "local durable path implemented (SQLite via node:sqlite)",
       "limitation": "does not survive a horizontally-scaled serverless deployment's ephemeral per-instance filesystem; a hosted database is required before multi-instance production deployment",
@@ -29,7 +29,7 @@
     }
   },
   "competition": {
-    "deadline": null,
+    "deadline": "2026-09-27T23:59:00Z",
     "deadlineExtensionClaim": {
       "claim": "Orion extended the Builder Hackathon by 14 days; 300+ builders, 18 live applications",
       "source": "reported to this agent by the operator, attributed to public mirrors of @Orion_Agents",
@@ -52,13 +52,13 @@
     "npm run verify:receipt -- <path|url|->"
   ],
   "evidenceClassification": {
-    "live": [],
+    "live": ["GATE-001-R2 public Store and Base registry reads; no signed attestation or dispatch"],
     "fixture": ["all frontend fixture scenarios listed in HIREWALL_FRONTEND_HANDOFF.md section 28"],
     "faultInjection": ["fault_injection_tamper", "fault_injection_expiry"]
   },
   "limitations": [
-    "Backend does not exist yet. Frontend runs entirely on fixture/fault-injection data.",
-    "GATE-001 (public live Orion AgentBound attestation retrieval) has not passed — see GATES.md.",
+    "The backend exists and the frontend calls it by default. The Orion provider is implemented against observed public surfaces but sampled signed attestations return 404; frontend fixture mode requires an explicit development opt-in.",
+    "GATE-001-R2 found live AgentBound state, but signed wallet-bound attestation retrieval and verification have not passed — see GATES.md.",
     "No live transaction, receipt, or catalog run has been produced. All numbers in this file are null, not placeholder values, until measured."
   ],
   "withdrawnClaims": []

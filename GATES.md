@@ -1,5 +1,35 @@
 # HIREWALL — Gate Log
 
+## GATE-001-R2: Restored Orion application and AgentBound retest
+
+```text
+Gate: GATE-001-R2 — live Orion AgentBound credential retrieval and independent verification
+Timestamp: 2026-09-27T18:38:39Z
+Pre-registered pass rule: A real Store agent returns a signed Orion credential
+  and independent verification establishes signer, subject wallet, chain,
+  freshness, and AgentBound state before HIREWALL authorization.
+Observed artifact/run/transaction: The restored Orion application serves a
+  52-agent Store JSON response and a shipped client bundle that names the
+  AgentBound contract, REST reputation routes, and the x402 attestation route.
+  GET /api/x402/info confirms contract
+  0xb006ca09e390eb3082bb3cb0b43e788ebc6e76a0 and oracle
+  0x7cDd6Ea617c4F5F1c9a5128D2940c72e1A2E4900 on Base (8453).
+  Independent Base RPC reads confirm contract bytecode, the same oracle,
+  totalMinted=3, and exists(16)=true / exists(18)=true for real Store agents
+  Rigel and AUDIT. Both ownerOf values are the Orion treasury, not the builder
+  wallets. Both /api/x402/attestation/{id} calls and slug calls returned 404
+  with "No AgentBound reputation found". /api/agentbound/reputations returned [].
+Artifact location: evidence/campaign/gate-001-r2/
+Status: CONDITIONAL_PASS — live identity registry and real token state found;
+  signed wallet-bound credential retrieval/verification did not pass.
+Caveat: Mint existence and oracle state alone do not establish a worker's
+  dispatch wallet or independently verify a signed performance attestation.
+  The previous September outage result remains historically valid.
+Spec impact: Reopen the Orion provider against observed REST and Base surfaces.
+  Keep authorization fail-closed until wallet binding and freshness are proven.
+```
+
+
 Per `BUILD_CONTRACT.md` section 11. Every consequential gate entry is
 recorded here before and after the corresponding work happens. Nothing is
 edited retroactively to look cleaner; corrections get a new entry plus a

@@ -2,12 +2,16 @@ import type { HirewallApi } from "./hirewall-api";
 import { FixtureHirewallApi } from "./fixture-api";
 import { RemoteHirewallApi } from "./remote-api";
 
-const apiUrl = process.env.NEXT_PUBLIC_HIREWALL_API_URL;
+// Fixtures require an explicit local opt-in. A missing environment variable
+// must never turn the judge path into a static success scenario.
+export const usingFixtures = process.env.NEXT_PUBLIC_HIREWALL_USE_FIXTURES === "true";
 
-// Single source of truth for which adapter the app runs against.
-// Set NEXT_PUBLIC_HIREWALL_API_URL to switch from fixtures to the real backend.
-export const usingFixtures = !apiUrl;
+if (usingFixtures && process.env.NODE_ENV === "production") {
+  throw new Error("Frontend fixtures are development-only. Unset NEXT_PUBLIC_HIREWALL_USE_FIXTURES for production.");
+}
 
-export const hirewallApi: HirewallApi = apiUrl
-  ? new RemoteHirewallApi(apiUrl)
-  : new FixtureHirewallApi();
+const apiUrl = process.env.NEXT_PUBLIC_HIREWALL_API_URL ?? "";
+
+export const hirewallApi: HirewallApi = usingFixtures
+  ? new FixtureHirewallApi()
+  : new RemoteHirewallApi(apiUrl);

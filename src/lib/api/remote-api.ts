@@ -20,18 +20,29 @@ export class RemoteHirewallApi implements HirewallApi {
   constructor(private readonly baseUrl: string) {}
 
   private url(path: string): string {
-    return `${this.baseUrl}${path}`;
+    const base = this.baseUrl.replace(/\/$/, "");
+    if (base) return `${base}${path}`;
+    if (typeof window !== "undefined") return path;
+    const host = process.env.VERCEL_URL;
+    return host ? `https://${host}${path}` : `http://localhost:${process.env.PORT ?? "3000"}${path}`;
   }
 
   async createDispatch(input: CreateDispatchInput): Promise<{ workflowId: string }> {
+    if (!/^\d+(?:\.\d{1,6})?$/.test(input.maxBudget)) {
+      throw new Error("Max budget must be a non-negative USDC amount with at most six decimal places.");
+    }
+    const [whole, fraction = ""] = input.maxBudget.split(".");
+    const maxSpendAtomic = (BigInt(whole) * BigInt(1_000_000) + BigInt(fraction.padEnd(6, "0"))).toString();
     const res = await fetch(this.url("/api/dispatch"), {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         task: input.task,
-        maxSpend: input.maxBudget,
+        maxSpend: maxSpendAtomic,
         chainId: 8453,
         target: input.workerIdentifier,
+        mode: input.mode,
+        category: input.category,
         allowFallback: input.allowFallback ?? false,
       }),
     });

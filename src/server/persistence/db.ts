@@ -3,19 +3,7 @@ import { dirname } from "node:path";
 import { createRequire } from "node:module";
 import type { DatabaseSync as DatabaseSyncType } from "node:sqlite";
 
-// Loaded via createRequire rather than a static
-// `import ... from "node:sqlite"`: this repo's build tooling disagrees on
-// how to resolve that newer Node builtin — Vite/vitest's builtin-module
-// list predates node:sqlite and misresolves a static import as the bare
-// package "sqlite" (see vitest.config.ts's matching server.deps.external
-// entry). createRequire(process.cwd()) rather than
-// createRequire(import.meta.url) specifically: the latter form trips
-// Turbopack's bundling analysis ("Unsupported external type Url"). The
-// require context path doesn't matter here since "node:sqlite" is a Node
-// builtin, not resolved relative to any file.
-const { DatabaseSync } = createRequire(process.cwd() + "/")("node:sqlite") as {
-  DatabaseSync: typeof DatabaseSyncType;
-};
+const { DatabaseSync } = createRequire("/package.json")("node:sqlite") as { DatabaseSync: typeof DatabaseSyncType };
 
 // Durable local persistence via Node's built-in synchronous SQLite driver
 // (stable in Node 22.5+, no native dependency to install). This is the

@@ -30,7 +30,7 @@ function mapCandidate(candidate?: ResolvedCandidate): CandidateView | undefined 
 function mapPolicy(policy: BuyerPolicy, policyHash?: string): PolicyView {
   return {
     network: "Base",
-    maxSpend: policy.maxSpendAtomic,
+    maxSpend: formatUsdc(policy.maxSpendAtomic),
     currency: "USDC",
     freshAttestationRequired: policy.requireValidAttestation,
     walletMatchRequired: policy.requireWalletMatch,
@@ -39,6 +39,13 @@ function mapPolicy(policy: BuyerPolicy, policyHash?: string): PolicyView {
     minimumCompositeScore: policy.minimumCompositeScore,
     policyHash,
   };
+}
+
+function formatUsdc(atomic: string): string {
+  const amount = BigInt(atomic);
+  const whole = amount / BigInt(1_000_000);
+  const fraction = (amount % BigInt(1_000_000)).toString().padStart(6, "0").replace(/0+$/, "");
+  return fraction ? `${whole}.${fraction}` : whole.toString();
 }
 
 export function mapVerificationChecks(credential?: NormalizedCredentialResult): VerificationCheck[] {
@@ -63,7 +70,7 @@ function mapAuthorization(workflow: WorkflowRecord): AuthorizationView | undefin
         : "ACTIVE";
   return {
     id: lease.id,
-    amount: lease.maxAmountAtomic,
+    amount: formatUsdc(lease.maxAmountAtomic),
     currency: "USDC",
     network: "Base",
     issuedAt: lease.issuedAt,

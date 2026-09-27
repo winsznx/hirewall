@@ -10,6 +10,25 @@ import { getReceipt } from "../receipts/receipt-service";
 const provider = new FixtureCredentialProvider();
 
 describe("workflow orchestrator", () => {
+  it("find mode uses real candidate matching and falls back after a refusal", async () => {
+    const discoveryProvider = Object.assign(new FixtureCredentialProvider(), {
+      matchCandidates: async () => [
+        await provider.resolveCandidate({ slug: "fixture-expired" }),
+        await provider.resolveCandidate({ slug: "fixture-valid" }),
+      ],
+    });
+    const workflow = await createWorkflow(
+      { task: "test task", maxSpend: "100000", chainId: 8453, mode: "find", allowFallback: true },
+      discoveryProvider as never,
+      "fixture"
+    );
+    expect(workflow.decision).toBe("AUTHORIZE");
+    expect(workflow.candidate?.id).toBe("fixture-valid");
+    expect(workflow.attemptedCandidates).toMatchObject([
+      { candidate: { id: "fixture-expired" }, decision: "REFUSE", refusalCode: "ATTESTATION_EXPIRED" },
+    ]);
+  });
+
   it("a valid fixture candidate produces AUTHORIZE with a real lease", async () => {
     const workflow = await createWorkflow(
       { task: "test task", maxSpend: "100000", chainId: 8453, workerIdentifier: "fixture-valid", allowFallback: false },

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { hirewallApi } from "@/lib/api/client";
+import { hirewallApi, usingFixtures } from "@/lib/api/client";
 import { EmptyState } from "@/components/EmptyState";
 
 const EXAMPLES: Array<{ id: string; label: string }> = [
@@ -149,7 +149,7 @@ export default function DispatchWorkspacePage() {
         </button>
       </form>
 
-      <div className="mt-10">
+      {usingFixtures ? <div className="mt-10">
         <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-ink-faint">
           Development fixture scenarios
         </p>
@@ -165,7 +165,7 @@ export default function DispatchWorkspacePage() {
             </button>
           ))}
         </div>
-      </div>
+      </div> : null}
 
       {!task ? (
         <div className="mt-8">

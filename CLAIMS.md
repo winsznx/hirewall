@@ -6,8 +6,8 @@ kept current during implementation, not written from memory at the end.
 
 No public claims have been made yet. This file will gain one entry per
 claim as soon as a claim is first made anywhere public-facing (README,
-landing page, demo, social copy). Until GATE-001 passes (see `GATES.md`),
-no claim of live Orion integration may be added here or anywhere else.
+landing page, demo, social copy). GATE-001-R2 supports a narrow live claim
+about Store and Base registry reads, but no signed credential verification.
 
 ## Blocked claims
 
@@ -22,10 +22,19 @@ Claim: BLOCKED_BY_GATE_001 — a candidate's wallet was checked against its live
 Claim: BLOCKED_BY_GATE_001 — a live Orion credential's freshness/expiry was verified at dispatch
 Claim: BLOCKED_BY_GATE_001 — a frozen Store/catalog cohort was run against real Orion listings
 Claim: BLOCKED_BY_GATE_001 — a real Orion x402 paid dispatch occurred
-Claim: BLOCKED_BY_GATE_001 — an AgentBound on-chain identity was independently read from Base
 ```
 
 ## What can be honestly claimed today
+
+```text
+Claim: Orion's restored Store lists real agents Rigel (ID 16) and AUDIT (ID 18), and both have minted AgentBound tokens on Base
+Artifact: Orion Store API and AgentBound contract 0xb006ca09e390eb3082bb3cb0b43e788ebc6e76a0
+Evidence path: evidence/campaign/gate-001-r2/
+Evidence class: live | mainnet
+Denominator: two selected Store agents; no exhaustive cohort claim
+Limitations: their x402 attestation lookups return 404; token owner is Orion's treasury. This does not prove a worker-wallet binding, signature, freshness at dispatch, or authorization.
+Reproduction: GET https://orionagents.org/api/agents; cast call <contract> 'exists(uint256)(bool)' 16 --rpc-url https://mainnet.base.org
+```
 
 ```text
 Claim: HIREWALL enforces a bounded, expiring authorization lease before any paid dispatch attempt

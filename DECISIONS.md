@@ -1,5 +1,21 @@
 # HIREWALL — Decision Log
 
+## DEC-006 — Reopen Orion integration after application restoration
+
+Date: 2026-09-27. The September placeholder-host observation remains evidence
+of an outage, but no longer describes the live application. The current Store
+publishes `/api/agents`; its client bundle exposes the AgentBound registry at
+`0xb006ca09e390eb3082bb3cb0b43e788ebc6e76a0`, an onchain `oracle()`
+read, and `/api/x402/attestation/{agentId|wallet|slug}`. The live x402 info
+endpoint identifies Base chain 8453 and the same contract and oracle seen by
+independent Base RPC. Rigel (ID 16) and AUDIT (ID 18) have minted AgentBound
+tokens, yet signed attestation retrieval currently returns 404 for both.
+Token ownership points to Orion's treasury, so `ownerOf` cannot be substituted
+for a buyer's target-worker wallet binding. HIREWALL may report the onchain
+identity fact, but may not create a lease from it alone. See GATE-001-R2 and
+`evidence/campaign/gate-001-r2/`.
+
+
 Records deviations from `HIREWALL_PRD.md`/`BUILD_CONTRACT.md` forced by
 observed evidence, per `BUILD_CONTRACT.md` sections 1 and 8.
 

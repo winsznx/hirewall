@@ -76,12 +76,14 @@ describe("deterministic buyer policy (LLM cannot influence this)", () => {
 });
 
 describe("provider fail-closed behavior", () => {
-  it("OrionCredentialProvider always fails closed (never returns a fabricated result)", async () => {
+  it("OrionCredentialProvider rejects missing candidates and invalid chain context", async () => {
     const provider = new OrionCredentialProvider();
     await expect(provider.resolveCandidate({})).rejects.toThrow(ProviderUnavailableError);
-    await expect(
-      provider.verifyCandidate({ id: "x", source: "orion_store" }, { contextId: "ctx", chainId: 8453, requestedAt: NOW })
-    ).rejects.toThrow(ProviderUnavailableError);
+    const result = await provider.verifyCandidate(
+      { id: "x", source: "orion_store" }, { contextId: "ctx", chainId: 8453, requestedAt: NOW }
+    );
+    expect(result.status).toBe("REFUSED");
+    expect(result.refusalCode).toBe("CHAIN_MISMATCH");
   });
 
   it("FixtureCredentialProvider never claims VERIFIED for a scenario tagged expired", async () => {

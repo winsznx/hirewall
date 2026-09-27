@@ -1,9 +1,9 @@
 # HIREWALL — Architecture
 
-Status: frontend implemented. Backend core (provider boundary, policy,
-authorization lease, executor, receipts, workflow orchestrator, API
-routes) implemented and tested. Orion credential integration itself is
-blocked — see `GATES.md` GATE-001 and `DECISIONS.md` DEC-004.
+Status: frontend and backend core implemented. Orion Store candidate resolution,
+matching, Base AgentBound reads, and signed-attestation verification are wired.
+Live signed attestations for the sampled minted agents returned 404, so their
+workflows fail closed. See `GATES.md` GATE-001-R2 and `DECISIONS.md` DEC-006.
 
 ## Provider boundary (DEC-004)
 
@@ -13,7 +13,7 @@ User
 HIREWALL Agent (planning/candidate selection only — no truth authority)
   ↓
 CredentialProvider  (src/server/providers/provider.ts)
-  ├── OrionCredentialProvider   [BLOCKED / fails closed with ORION_PROVIDER_UNAVAILABLE]
+  ├── OrionCredentialProvider   [Store + Base registry + signed x402 attestation]
   └── FixtureCredentialProvider [DEV/PROOF ONLY — never selected by default]
   ↓
 NormalizedCredentialResult   (HIREWALL's own type, not a raw Orion payload)
@@ -71,7 +71,8 @@ This matches `HIREWALL_PRD.md` section 11's recommended
 
   /providers
     provider.ts            CredentialProvider interface + ProviderUnavailableError
-    orion-provider.ts       shell, fails closed — see GATES.md GATE-001
+    orion-provider.ts       live Store and Base reads, signed attestation gate
+    orion-attestation.ts    canonical EIP-191 message and independent recovery
     fixture-provider.ts      deterministic dev/test provider, 4 scenarios
     index.ts                 selectProvider() — explicit config, default "orion"
 
@@ -130,8 +131,9 @@ This matches `HIREWALL_PRD.md` section 11's recommended
 
 ```text
 buyer intent
-  -> provider.resolveCandidate()   OrionCredentialProvider: fails closed (GATE-001)
-                                    FixtureCredentialProvider: deterministic, dev-only
+  -> provider.matchCandidates()    find mode uses Orion's public matching API
+  -> provider.resolveCandidate()   direct mode uses Orion Store ID, slug, or builder wallet
+  -> provider.verifyCandidate()    Base AgentBound + signed Orion attestation; missing proof fails closed
   -> provider.verifyCandidate()    returns NormalizedCredentialResult (HIREWALL's own type)
   -> evaluatePolicy()               deterministic; LLM has no path into this function
   -> createLease()                   only reached if policy.ok === true
@@ -159,8 +161,8 @@ buyer intent
   Vercel Marketplace is the natural fit) implementing the same four
   repository interfaces. That swap is scoped to `/src/server/persistence`
   only; nothing above the repository boundary changes.
-- Catalog experiment runner — requires a live Orion Store cohort, blocked
-  on GATE-001; `getLatestCatalogRun()` honestly returns `null` in
+- Catalog experiment runner — live Store cohort is now accessible, but no
+  frozen field run is published yet; `getLatestCatalogRun()` returns `null` in
   `RemoteHirewallApi`.
 - `scripts/verify-receipt.ts` implemented (`npm run verify:receipt -- <path|url|->`).
   Other `/scripts` from `HIREWALL_PRD.md` section 25 (`evidence:*`

@@ -8,6 +8,8 @@ export interface CredentialProvider<CandidateInput = unknown> {
 
   resolveCandidate(input: CandidateInput): Promise<ResolvedCandidate>;
 
+  matchCandidates?(intent: string, category?: string): Promise<ResolvedCandidate[]>;
+
   verifyCandidate(
     candidate: ResolvedCandidate,
     context: VerificationContext

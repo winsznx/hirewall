@@ -1,32 +1,34 @@
 # HIREWALL — Setup
 
-## Frontend (current state)
+## Frontend and backend
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000, runs against FixtureHirewallApi
+npm run dev      # http://localhost:3000, uses the real /api routes
 npm run build
 npm run lint
 npx tsc --noEmit
 ```
 
-The frontend runs entirely on fixture data by default — no environment
-variables required. `src/lib/api/client.ts` is the single switch: set
-`NEXT_PUBLIC_HIREWALL_API_URL` to point it at a real backend once one
-exists. See `src/lib/api/remote-api.ts` for the integration seam.
+The frontend calls this application's `/api` routes by default. For a
+separate backend origin, set `NEXT_PUBLIC_HIREWALL_API_URL`. Static frontend
+fixtures require `NEXT_PUBLIC_HIREWALL_USE_FIXTURES=true` in development;
+production builds reject that setting. The default Orion provider currently
+fails closed until a real credential source and verifier are integrated.
 
 ## Backend
 
 ```bash
-npm run test      # 42 deterministic invariant tests (vitest), no network required
+npm run test      # 54 deterministic invariant tests (vitest), no network required
 ```
 
 The enforcement mechanism (policy engine, authorization lease, executor,
 receipts, workflow orchestrator, `/api/*` routes) is implemented, durable,
 and tested — see `ARCHITECTURE.md`. The Orion credential integration
-itself is blocked on `GATES.md` GATE-001; see `DECISIONS.md` DEC-004 for
-the provider-boundary architecture that lets the rest of the system
-proceed honestly in the meantime.
+now resolves live Store agents, reads Base AgentBound state, and checks the
+documented EIP-191 attestation. The sampled minted agents currently return
+404 for signed attestations, so they remain `UNVERIFIABLE` with no lease.
+See `GATES.md` GATE-001-R2 and `DECISIONS.md` DEC-006.
 
 To run the backend against fixtures locally:
 
@@ -34,12 +36,10 @@ To run the backend against fixtures locally:
 HIREWALL_PROVIDER=fixture npm run dev
 ```
 
-Then set `NEXT_PUBLIC_HIREWALL_API_URL=http://localhost:3000` in the
-frontend's env to route through the real backend (still fixture-only
-until GATE-001 unblocks Orion). Omitting `HIREWALL_PROVIDER` selects
-`OrionCredentialProvider`, which fails closed — every workflow reports
-`UNVERIFIABLE / DEPENDENCY_UNAVAILABLE` honestly rather than silently
-using fixtures.
+The frontend will use these routes automatically. This server-side fixture
+setting is for local development only. Omitting `HIREWALL_PROVIDER` selects
+`OrionCredentialProvider`, which requires live Store, Base, and signed
+attestation evidence and fails closed when any load-bearing proof is missing.
 
 ### Persistence
 
