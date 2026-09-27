@@ -32,27 +32,29 @@ export default async function CatalogPage() {
       </h1>
 
       <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 rounded-xl border border-border bg-surface p-5 text-[13px] sm:grid-cols-3">
-        <div>
+        <div className="min-w-0">
           <dt className="text-ink-faint">Snapshot</dt>
           <dd>
-            <HashValue value={run.snapshotHash} label="snapshot hash" />
+            <HashValue value={run.snapshotHash.slice(0, 18) + "…"} full={run.snapshotHash} label="snapshot hash" />
           </dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className="text-ink-faint">Software commit</dt>
-          <dd className="font-mono text-ink">{run.softwareCommit}</dd>
+          <dd>
+            <HashValue value={run.softwareCommit.slice(0, 10) + "…"} full={run.softwareCommit} label="software commit" />
+          </dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className="text-ink-faint">Policy</dt>
           <dd className="font-medium text-ink">
             Max {run.policy.maxSpend} {run.policy.currency} · {run.policy.network}
           </dd>
         </div>
-        <div className="col-span-2 sm:col-span-3">
+        <div className="col-span-2 min-w-0 sm:col-span-3">
           <dt className="text-ink-faint">Baseline rule</dt>
           <dd className="text-ink">{run.baselineRule}</dd>
         </div>
-        <div className="col-span-2 sm:col-span-3">
+        <div className="col-span-2 min-w-0 sm:col-span-3">
           <dt className="text-ink-faint">HIREWALL rule</dt>
           <dd className="text-ink">{run.hirewallRule}</dd>
         </div>
