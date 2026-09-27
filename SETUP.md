@@ -17,7 +17,7 @@ For explicitly labeled local fixture work, set `HIREWALL_PROVIDER=fixture NEXT_P
 
 ## Persistence
 
-Local SQLite defaults to `.data/hirewall.sqlite`. Set `HIREWALL_DB_PATH` to change it. Vercel production requires `DATABASE_URL`, provisioned by the Neon Marketplace integration. Missing credentials fail closed. Postgres schema migration 1 creates leases, consumed nonces, execution claims, workflows, receipts, and catalog runs. Run `npm run db:migrate` with `DATABASE_URL` set to check the migration. The first database request also applies the idempotent migration. `HIREWALL_DB_BACKEND=neon` lets local verification use Neon.
+Local SQLite defaults to `.data/hirewall.sqlite`. Set `HIREWALL_DB_PATH` to change it. Vercel production requires `DATABASE_URL`, provisioned by the Neon Marketplace integration. Missing credentials fail closed. Postgres schema migration 1 creates leases, consumed nonces, execution claims, workflows, receipts, and catalog runs; migration 2 stores exact raw Store bytes. Run `npm run db:migrate` with `DATABASE_URL` set to check migrations. The first database request also applies idempotent migrations. `HIREWALL_DB_BACKEND=neon` lets local verification use Neon.
 
 ## Live catalog
 

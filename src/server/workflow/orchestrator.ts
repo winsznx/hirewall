@@ -19,7 +19,7 @@ export interface CreateWorkflowInput {
   category?: string;
 }
 
-const SOFTWARE_COMMIT = process.env.HIREWALL_COMMIT ?? "unknown";
+const SOFTWARE_COMMIT = process.env.HIREWALL_COMMIT ?? process.env.VERCEL_GIT_COMMIT_SHA ?? "unknown";
 
 function nowIso(): string {
   return new Date().toISOString();

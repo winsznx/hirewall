@@ -4,5 +4,6 @@ import { getCatalogSnapshot } from "@/server/persistence/catalog-repo";
 export async function GET(_request: Request, { params }: { params: Promise<{ runId: string }> }) {
   const { runId } = await params;
   const snapshot = await getCatalogSnapshot(runId);
-  return snapshot ? NextResponse.json(snapshot) : NextResponse.json({ error: "not_found" }, { status: 404 });
+  return snapshot ? new Response(snapshot, { headers: { "content-type": "application/json; charset=utf-8" } })
+    : NextResponse.json({ error: "not_found" }, { status: 404 });
 }

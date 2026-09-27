@@ -1,0 +1,493 @@
+{
+  "id": "cat_3e2f9edc-ac77-439c-baf9-71bfae5dec39",
+  "counts": {
+    "refuse": 48,
+    "authorize": 0,
+    "unverifiable": 4
+  },
+  "policy": {
+    "network": "Base",
+    "currency": "USDC",
+    "maxSpend": "0.1",
+    "walletMatchRequired": true,
+    "freshAtDispatchRequired": true,
+    "freshAttestationRequired": true
+  },
+  "candidates": [
+    {
+      "name": "Recourse",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_83060ab7-0e26-41b6-964c-70350b630a4f",
+      "candidateId": "33",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "RAKE",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_3e063053-0986-4d3c-b905-de64299e0bf1",
+      "candidateId": "40",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Verdict",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_5f440745-d509-4d2d-902b-dfa4e4c3b635",
+      "candidateId": "37",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Ovryth",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_9c9a5ab8-1376-4f68-9b99-7abc06d9244a",
+      "candidateId": "62",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "0GZK",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_1456588d-78e9-48e0-bbf4-1f1b10f71970",
+      "candidateId": "44",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Confam",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_fdc5c3da-74e8-4aa8-92b4-92fb90bb19d7",
+      "candidateId": "35",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Delivered",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_6dd9bc26-797e-49df-a275-87b591d71a10",
+      "candidateId": "25",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "PayTack",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_cf2f4f6d-d849-47ae-a8f7-b4f49501bb3a",
+      "candidateId": "28",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Obelus",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_f9f1603c-e935-4cba-ac47-343101fc0c93",
+      "candidateId": "56",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "LIVING ALPHA COUNCIL",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_3b546117-a3bc-461e-9226-a56726bf56d1",
+      "candidateId": "30",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Watchtower",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_e4fd6018-f997-4863-9983-066e555ca8c7",
+      "candidateId": "34",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "CoinOp",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_e2c3716b-500e-462e-afff-de8ec8aa74a1",
+      "candidateId": "15",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Proof of Delivery",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_3cac6aa6-876d-45dc-ae3c-5de19e7910cd",
+      "candidateId": "58",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "shanks",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_08bf8b5a-e79d-44ff-85c3-7163d8f0e9e8",
+      "candidateId": "31",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Sellvane",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_8584499f-1a82-49e4-a589-33caf098a49b",
+      "candidateId": "61",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Shamar",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_4ef84baa-e548-4240-89b0-05dfb8289979",
+      "candidateId": "57",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "BaseScout",
+      "decision": "UNVERIFIABLE",
+      "receiptId": "rcpt_bb053cd8-e4fb-4562-96ec-e186f559fa31",
+      "candidateId": "17",
+      "refusalCode": "ATTESTATION_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "ShowingKit",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_588a93ae-61e4-4226-bfee-2232518996b4",
+      "candidateId": "39",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Sovereign",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_03a84c7a-918b-4cb4-b566-eea8af45b795",
+      "candidateId": "22",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Obsign Sentinel",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_4fc9f55b-a186-496e-8aa9-5a9d88d007ed",
+      "candidateId": "55",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Kryptic check ",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_6ab78835-6e8a-47f5-a28c-52cda8d3c927",
+      "candidateId": "64",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Drift-d",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_4529cc03-782d-43c8-8fe9-d5104bb43812",
+      "candidateId": "14",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "ScamLens",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_8edd329c-a5df-481f-94c1-62e57df160b4",
+      "candidateId": "29",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Sellvane",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_be688e28-1e6a-4eaa-8ec3-8ecd8d7b1355",
+      "candidateId": "60",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Payrail — agent payouts",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_b145d77b-7ad5-4d80-bfcc-b483d6bf8baf",
+      "candidateId": "63",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "ShadowDetective",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_dbcb6f77-e80e-4477-9769-c8b93ce28d1d",
+      "candidateId": "51",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "OrionX",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_2e6f0804-19f5-4b09-94b7-9eeb6f02dc9e",
+      "candidateId": "26",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "VETTE",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_73cff55b-6e4c-41b6-9d82-c78fa521aebe",
+      "candidateId": "19",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Verdict",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_b3e8d1f3-de37-4e1e-a44d-f312d5786c44",
+      "candidateId": "49",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "AEGIS",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_0ee37c25-ca23-4983-b6a1-892f82bfc475",
+      "candidateId": "65",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Sidik",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_d1f27d2a-81cf-40e7-aed5-ec493da154d4",
+      "candidateId": "41",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Avelune",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_9de8d6c8-dc5c-47da-afdd-ae0e2167c68c",
+      "candidateId": "24",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Fork",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_46133134-9e67-4ae4-9bb7-f9a6de1bcc08",
+      "candidateId": "32",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Rigel",
+      "decision": "UNVERIFIABLE",
+      "receiptId": "rcpt_3153d596-4458-4612-9dfe-5ac04d12f38e",
+      "candidateId": "16",
+      "refusalCode": "ATTESTATION_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "AgentTrial",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_ae2151ec-151e-4e4c-9879-4f46d0986d51",
+      "candidateId": "21",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Nemesis",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_4fa32a04-9929-4bf4-90cc-4d1fbeb5e488",
+      "candidateId": "27",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Arksonus_ai",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_8a8d3814-5569-4af1-b1bb-c4bcd04e7b42",
+      "candidateId": "45",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Shield",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_af0dcb25-b8f0-4ad8-8bed-008d20ccf1b4",
+      "candidateId": "42",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "AUDIT",
+      "decision": "UNVERIFIABLE",
+      "receiptId": "rcpt_30c6ae72-ce80-4a02-a7a2-e0a6b154d882",
+      "candidateId": "18",
+      "refusalCode": "ATTESTATION_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Parity ",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_1b579bfc-ba3b-4491-88e6-b735654743c7",
+      "candidateId": "47",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "hSpace",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_077c6d62-0426-4359-90d1-0e572a6568f6",
+      "candidateId": "43",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "10x AI",
+      "decision": "UNVERIFIABLE",
+      "receiptId": "rcpt_a4ca2455-1bd5-4eb3-8416-699d8475cac8",
+      "candidateId": "46",
+      "refusalCode": "DEPENDENCY_UNAVAILABLE",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Headcount",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_ae172751-97bf-4845-a6f7-fc2b86d5fab8",
+      "candidateId": "50",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Sentinel",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_a9507528-6ba6-42ec-b571-292254245fa6",
+      "candidateId": "54",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Saiph ",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_c87e00ae-6dc8-4aa3-b02f-304b6ffb9fac",
+      "candidateId": "53",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Autopsy",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_8f6a7b04-4efc-4972-bff2-4d77bd40acbd",
+      "candidateId": "48",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Nomylax ",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_9ffef896-dd59-4798-b691-4cf6fd6a39eb",
+      "candidateId": "38",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Mekiki",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_d1a02566-1afe-41be-8943-d97878ac4e32",
+      "candidateId": "52",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Canary",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_91fbb8d6-1b5e-4f3e-bf64-c2d7a7c4e2ce",
+      "candidateId": "23",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "VeraOS",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_897f5f4a-46a7-48f3-abb3-8ccd36e70e2b",
+      "candidateId": "59",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "Termproof",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_4cabb69f-ffc2-4721-bbc6-85955d514e79",
+      "candidateId": "20",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    },
+    {
+      "name": "ORBIS LABS",
+      "decision": "REFUSE",
+      "receiptId": "rcpt_6181c74d-bc7b-42c6-a619-7a3998ef44d8",
+      "candidateId": "36",
+      "refusalCode": "AGENTBOUND_MISSING",
+      "baselineEligible": true,
+      "attestationFreshnessAtRun": "unavailable"
+    }
+  ],
+  "baselineRule": "A current Orion Store listing is discoverable, regardless of AgentBound status.",
+  "evidenceMode": "live",
+  "hirewallRule": "A fresh oracle-signed Orion AgentBound attestation and buyer policy must pass before a lease exists.",
+  "runTimestamp": "2026-09-27T19:21:06.167Z",
+  "snapshotHash": "sha256:11e825da496ca4ca41543533c1584839a89d0e201cdf1400dcca1a422d278f96",
+  "softwareCommit": "2a623812a19a93a03671e1eb1da597002048eb44",
+  "cohortDenominator": 52
+}

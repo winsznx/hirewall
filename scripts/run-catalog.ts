@@ -41,7 +41,7 @@ async function main(): Promise<void> {
     counts: { authorize: 0, refuse: 0, unverifiable: 0 },
     candidates: [],
   };
-  await putCatalogRun(run, parsed);
+  await putCatalogRun(run, parsed, raw);
   const provider = new OrionCredentialProvider(base);
   for (const [index, agent] of parsed.entries()) {
     const workflow = await createWorkflow({ task: "Catalog screening: Base agent dispatch", maxSpend: "100000", chainId: 8453,
@@ -54,7 +54,7 @@ async function main(): Promise<void> {
       decision, refusalCode: workflow.refusalCode,
       attestationFreshnessAtRun: workflow.credentialResult?.expiresAt ?? "unavailable",
       receiptId: workflow.receiptId ?? "unavailable" });
-    await putCatalogRun(run, parsed);
+    await putCatalogRun(run, parsed, raw);
     process.stdout.write(`${index + 1}/${parsed.length} ${agent.slug}: ${decision} ${workflow.refusalCode ?? ""}\n`);
   }
   process.stdout.write(`${JSON.stringify({ runId: run.id, snapshotHash, counts: run.counts })}\n`);

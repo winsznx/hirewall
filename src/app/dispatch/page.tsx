@@ -23,10 +23,12 @@ export default function DispatchWorkspacePage() {
   const [allowFallback, setAllowFallback] = useState(true);
   const [workerIdentifier, setWorkerIdentifier] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!task.trim()) return;
+    setSubmitError(null);
     setSubmitting(true);
     try {
       const { workflowId } = await hirewallApi.createDispatch({
@@ -38,6 +40,8 @@ export default function DispatchWorkspacePage() {
         workerIdentifier: mode === "check" ? workerIdentifier : undefined,
       });
       router.push(`/dispatch/${workflowId}`);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Could not create the workflow. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -93,7 +97,7 @@ export default function DispatchWorkspacePage() {
               value={workerIdentifier}
               onChange={(e) => setWorkerIdentifier(e.target.value)}
               className="mt-1.5 w-full rounded-md border border-border-strong bg-canvas px-3 py-2 text-[14px] text-ink outline-none focus:border-accent"
-              placeholder="courier-7"
+              placeholder="rigel"
             />
           </div>
         ) : null}
@@ -147,6 +151,7 @@ export default function DispatchWorkspacePage() {
         >
           {submitting ? "Dispatching…" : "Dispatch"}
         </button>
+        {submitError ? <p role="alert" className="text-[13px] text-refuse">{submitError}</p> : null}
       </form>
 
       {usingFixtures ? <div className="mt-10">

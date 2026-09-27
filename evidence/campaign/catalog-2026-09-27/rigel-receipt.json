@@ -1,0 +1,80 @@
+{
+  "policy": {
+    "result": "NOT_EVALUATED",
+    "policyHash": "0x030a3b6e307d9a071bf54910696e649bc46580d2971787c496cb19ddd44cc8fd"
+  },
+  "request": {
+    "chainId": 8453,
+    "taskHash": "0x340a5cea42cd0643181114b263749cae2d7e748c97adcbc5b1355e84efec6e03",
+    "contextId": "ctx_hw_c6672cfc-6bf8-4b68-8d34-ebe4c7a92683",
+    "maxSpendAtomic": "100000"
+  },
+  "decision": "UNVERIFIABLE",
+  "provider": {
+    "providerId": "orion"
+  },
+  "software": {
+    "commit": "unknown",
+    "policyVersion": "0.1.0",
+    "verifierVersion": "0.1.0"
+  },
+  "candidate": {
+    "id": "16",
+    "name": "Rigel",
+    "slug": "rigel",
+    "source": "orion_store",
+    "category": "risk",
+    "listingUrl": "https://orionagents.org/agent/rigel",
+    "declaredWallet": "0x95b24cab4ea9f63e031c207d62fb41853e67122d"
+  },
+  "createdAt": "2026-09-27T19:23:02.129Z",
+  "execution": {
+    "state": "NOT_ATTEMPTED"
+  },
+  "receiptId": "rcpt_3153d596-4458-4612-9dfe-5ac04d12f38e",
+  "receiptHash": "0x56f8641aa294d8392a69f2ed9ef4076a04856df883a07a6181415c9a41bc5fa7",
+  "refusalCode": "ATTESTATION_MISSING",
+  "evidenceMode": "live",
+  "verification": {
+    "checks": [
+      {
+        "id": "onchain_agentbound",
+        "status": "PASS"
+      },
+      {
+        "id": "onchain_reputation",
+        "status": "PASS"
+      },
+      {
+        "id": "signed_attestation",
+        "code": "ATTESTATION_MISSING",
+        "status": "UNAVAILABLE"
+      },
+      {
+        "id": "wallet_binding",
+        "code": "WALLET_MISMATCH",
+        "status": "UNAVAILABLE"
+      }
+    ],
+    "status": "UNVERIFIABLE",
+    "subject": {
+      "id": "16",
+      "chainId": 8453
+    },
+    "checkedAt": "2026-09-27T19:23:00.717Z",
+    "providerId": "orion",
+    "refusalCode": "ATTESTATION_MISSING",
+    "providerReceipt": {
+      "tier": 1,
+      "score": 4700,
+      "minted": true,
+      "oracle": "0x7cDd6Ea617c4F5F1c9a5128D2940c72e1A2E4900",
+      "agentId": 16,
+      "slashed": false,
+      "registry": "0xb006ca09e390eb3082bb3cb0b43e788ebc6e76a0",
+      "attestedAt": "1788910611",
+      "attestationCount": 4
+    }
+  },
+  "schemaVersion": "1.0"
+}

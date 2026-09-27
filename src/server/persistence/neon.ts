@@ -22,8 +22,10 @@ async function migrate(): Promise<void> {
   await sql.query(`CREATE TABLE IF NOT EXISTS hirewall_workflows (id text PRIMARY KEY, payload jsonb NOT NULL, updated_at text NOT NULL)`);
   await sql.query(`CREATE TABLE IF NOT EXISTS hirewall_receipts (id text PRIMARY KEY, payload jsonb NOT NULL, created_at text NOT NULL)`);
   await sql.query(`CREATE TABLE IF NOT EXISTS hirewall_catalog_runs (id text PRIMARY KEY, payload jsonb NOT NULL, snapshot jsonb NOT NULL, created_at text NOT NULL)`);
+  await sql.query(`ALTER TABLE hirewall_catalog_runs ADD COLUMN IF NOT EXISTS raw_body text`);
   await sql.query(`CREATE TABLE IF NOT EXISTS hirewall_schema_migrations (version integer PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())`);
   await sql.query(`INSERT INTO hirewall_schema_migrations (version) VALUES (1) ON CONFLICT DO NOTHING`);
+  await sql.query(`INSERT INTO hirewall_schema_migrations (version) VALUES (2) ON CONFLICT DO NOTHING`);
 }
 
 export async function neonQuery(query: string, params: unknown[] = []): Promise<Row[]> {

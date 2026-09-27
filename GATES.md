@@ -168,3 +168,7 @@ A live `/api/agents` response contained 52 entries. Its exact response bytes has
 Artifacts: `evidence/campaign/catalog-2026-09-27/` holds exact raw Store bytes, exported snapshot, run record, and Rigel's raw receipt. The hash can be reproduced with `shasum -a 256 store-raw.json`. The catalog web page reads the persisted run from Neon. This is a cohort observation at its timestamp, not a claim about every Orion agent forever.
 
 Still unproven: a live signed Orion artifact, independent verification of its oracle signature and wallet binding, an active live lease, and a paid x402 settlement to a matching worker. These require Orion to expose a signed credential for a live Store candidate and a compatible seller endpoint; payment additionally requires a funded payer.
+
+### Public deployment smoke
+
+`https://hirewall.vercel.app` returned HTTP 200. Its `/api/catalog/latest` returned post-commit run `cat_3e2f9edc-ac77-439c-baf9-71bfae5dec39` with the 52-entry count above. A public POST for Rigel returned workflow `hw_6b8cf732-96f1-49df-b8d8-ac4693f28d60` and receipt `rcpt_938380a8-57b5-47a3-a916-81f43cfc37df`: onchain AgentBound and reputation passed; signed attestation and wallet binding were unavailable; the decision was `UNVERIFIABLE`, no lease was created, and execution was `NOT_ATTEMPTED`. The raw receipt passed HIREWALL's offline integrity checks, while Orion signature proof remained `NOT_CLAIMED`.

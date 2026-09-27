@@ -26,6 +26,17 @@ Claim: BLOCKED_BY_GATE_001 — a real Orion x402 paid dispatch occurred
 ## What can be honestly claimed today
 
 ```text
+Claim: the public HIREWALL deployment resolves a real Orion worker and refuses dispatch when signed attestation material is missing
+Artifact: https://hirewall.vercel.app/api/receipts/rcpt_938380a8-57b5-47a3-a916-81f43cfc37df?format=raw
+Evidence path: public Vercel API and evidence/campaign/catalog-2026-09-27/
+Evidence class: live
+Denominator: one production Rigel smoke workflow; separate from the 52-entry catalog run
+Result: onchain AgentBound and reputation PASS, signed attestation UNAVAILABLE, decision UNVERIFIABLE, no lease, execution NOT_ATTEMPTED
+Limitations: does not demonstrate a successful signed credential or paid execution. The receipt hash is not issuer authentication.
+Reproduction: POST /api/dispatch with target rigel, Base chainId 8453, and a positive atomic USDC budget; fetch its raw receipt and run npm run verify:receipt
+```
+
+```text
 Claim: a frozen live Orion Store cohort was screened by HIREWALL on 2026-09-27
 Artifact: evidence/campaign/catalog-2026-09-27/store-raw.json and run.json
 Evidence path: evidence/campaign/catalog-2026-09-27/

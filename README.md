@@ -1,5 +1,7 @@
 # HIREWALL
 
+Live app: [hirewall.vercel.app](https://hirewall.vercel.app)
+
 **No valid AgentBound authorization, no dispatch.** HIREWALL resolves a worker from Orion, checks the current AgentBound identity and signed reputation attestation, applies a buyer mandate, and issues a short-lived lease that gates x402 execution.
 
 The current public Orion Store and Base registry are reachable. For sampled minted agents, Orion's signed attestation API returns 404. HIREWALL therefore produces an `UNVERIFIABLE` receipt and creates no payment authority. The [claim ledger](CLAIMS.md) and [gate report](GATES.md) distinguish this live observation from deterministic fixture tests.
