@@ -4,38 +4,35 @@ import { FixtureCredentialProvider } from "@/server/providers/fixture-provider";
 import { verifyReceipt } from "@/server/receipts/verifier";
 import { getReceipt } from "@/server/receipts/receipt-service";
 import { mapVerificationChecks as mapVerificationChecksForProofLab } from "@/server/view-mapper";
+import { PROOF_LAB_SCENARIOS } from "@/lib/proof-lab-scenarios";
 
 // Proof Lab only ever runs HIREWALL-owned scenarios against the fixture
 // provider through the exact same orchestrator/policy/lease/executor code
 // production uses. It never simulates an Orion-specific signature/signer
 // tamper and calls it Orion — those scenarios are blocked by GATE-001 and
 // intentionally absent here. See DECISIONS.md DEC-004.
-const SCENARIOS: Record<string, { slug: string; label: string; description: string; replay?: boolean; tamperReceipt?: boolean }> = {
-  valid: { slug: "fixture-valid", label: "Valid credential", description: "Fresh, correctly-bound fixture credential." },
-  expired: { slug: "fixture-expired", label: "Expired credential", description: "Fixture credential past its freshness window." },
-  wallet_mismatch: {
-    slug: "fixture-wallet-mismatch",
-    label: "Wallet substitution",
-    description: "Fixture credential wallet does not match the request target.",
-  },
-  provider_unavailable: {
-    slug: "fixture-unverifiable",
-    label: "Dependency unavailable",
-    description: "Simulated credential-source outage.",
-  },
-  replay: {
-    slug: "fixture-valid",
-    label: "Replayed authorization",
-    description: "A valid lease is executed twice; the second attempt must be rejected.",
-    replay: true,
-  },
-  receipt_tamper: {
-    slug: "fixture-valid",
-    label: "Receipt tamper",
-    description: "A field in an otherwise-valid receipt is mutated after issuance; the verifier must detect it.",
-    tamperReceipt: true,
-  },
+//
+// The operational fields below (fixture slug, replay/tamperReceipt flags)
+// are keyed by the same ids as PROOF_LAB_SCENARIOS so the frontend
+// dropdown and this route can never drift apart again — every id here
+// must exist in PROOF_LAB_SCENARIOS, enforced at module load below.
+const SCENARIO_OPERATIONS: Record<string, { slug: string; replay?: boolean; tamperReceipt?: boolean }> = {
+  valid: { slug: "fixture-valid" },
+  expired: { slug: "fixture-expired" },
+  wallet_mismatch: { slug: "fixture-wallet-mismatch" },
+  provider_unavailable: { slug: "fixture-unverifiable" },
+  replay: { slug: "fixture-valid", replay: true },
+  receipt_tamper: { slug: "fixture-valid", tamperReceipt: true },
 };
+
+const SCENARIOS: Record<string, { slug: string; label: string; description: string; replay?: boolean; tamperReceipt?: boolean }> =
+  Object.fromEntries(
+    PROOF_LAB_SCENARIOS.map((s) => {
+      const ops = SCENARIO_OPERATIONS[s.id];
+      if (!ops) throw new Error(`Proof Lab scenario "${s.id}" has no operational definition in route.ts`);
+      return [s.id, { ...ops, label: s.label, description: s.description }];
+    })
+  );
 
 export async function POST(request: Request) {
   const body = await request.json();

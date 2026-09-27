@@ -12,7 +12,7 @@ const SOURCE_FIXTURES = [{ id: "valid_authorized", label: "Courier-7 — valid, 
 
 export default function ProofLabPage() {
   const [sourceFixtureId, setSourceFixtureId] = useState(SOURCE_FIXTURES[0].id);
-  const [scenarioId, setScenarioId] = useState(PROOF_LAB_SCENARIOS[1].id);
+  const [scenarioId, setScenarioId] = useState("expired");
   const [run, setRun] = useState<ProofLabRun | null>(null);
   const [running, setRunning] = useState(false);
 

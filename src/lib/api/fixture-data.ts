@@ -4,9 +4,9 @@ import type {
   DispatchWorkflow,
   HirewallReceipt,
   PolicyView,
-  ProofLabScenario,
   VerificationCheck,
 } from "@/lib/types";
+import { PROOF_LAB_SCENARIOS } from "@/lib/proof-lab-scenarios";
 
 // Development fixture data. Every object here carries evidenceMode
 // "fixture" or "fault_injection" so the UI can never mistake it for
@@ -447,27 +447,7 @@ export const FIXTURE_RECEIPTS: Record<string, HirewallReceipt> = Object.fromEntr
     })
 );
 
-export const PROOF_LAB_SCENARIOS: ProofLabScenario[] = [
-  { id: "valid", label: "Valid credential", description: "Run the verifier against an unmodified attestation." },
-  {
-    id: "tamper_payload",
-    label: "Tamper signed payload",
-    description: "Flip one byte in the signed attestation payload before verification.",
-  },
-  { id: "swap_wallet", label: "Swap wallet", description: "Replace the bound wallet with a different address." },
-  { id: "expire_credential", label: "Expire credential", description: "Rewrite the expiry to a past timestamp." },
-  { id: "exceed_budget", label: "Exceed budget", description: "Quote a price above the buyer's maximum spend." },
-  {
-    id: "replay_authorization",
-    label: "Replay authorization",
-    description: "Resubmit a previously consumed authorization.",
-  },
-  {
-    id: "malformed_attestation",
-    label: "Malformed attestation",
-    description: "Submit an attestation payload that fails to parse.",
-  },
-];
+export { PROOF_LAB_SCENARIOS };
 
 export const FIXTURE_FAULT_INJECTIONS: Record<string, DispatchWorkflow> = {
   fault_injection_tamper: workflow({
