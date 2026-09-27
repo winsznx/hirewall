@@ -12,20 +12,20 @@
   },
   "orionIntegration": {
     "surface": "public Store API, x402 info API, and AgentBound Base registry",
-    "status": "partial — Store and onchain AgentBound state independently observed; signed credential endpoints for minted agents return 404",
+    "status": "live \u2014 onchain AgentBound identity independently established and load-bearing; signed reputation attestation still unavailable for all sampled candidates",
     "reason": "gate-001-r2",
     "identifiersUsed": [
       "basescout (Store ID 17)",
       "rigel (Store ID 16)",
       "audit (Store ID 18)"
     ],
-    "note": "The 52-entry live Store cohort was screened on Base. Rigel and AUDIT have minted AgentBound state but no retrievable signed wallet attestation, so no live lease was created. See GATE-001-R3 and evidence/campaign/catalog-2026-09-27/."
+    "note": "IDENTITY_REQUIRED policy (DEC-008) now issues a real authorization lease from live onchain AgentBound state alone. First real (non-fixture) AUTHORIZE: rcpt_e01e8665-d352-4ea7-9eed-7a5d3a35d946 (candidate Rigel, id 16). REPUTATION_REQUIRED policy on the identical candidate still correctly refuses UNVERIFIABLE/ATTESTATION_MISSING, since Orion signed attestation remains unavailable. See GATE-001-R3 and DECISIONS.md DEC-008."
   },
   "enforcementMechanism": {
     "status": "implemented, tested, deployed with Neon persistence; live signed authorization blocked by Orion artifact availability",
     "note": "Production workflow resolves Store workers, reads AgentBound, evaluates policy, persists refusal receipts in Neon, and gates x402 execution behind a lease. Public Rigel dispatch returned UNVERIFIABLE/ATTESTATION_MISSING, no lease, and NOT_ATTEMPTED execution.",
     "testCommand": "npm run test",
-    "testCount": 63,
+    "testCount": 69,
     "durability": {
       "status": "production Neon Postgres provisioned and connected on Vercel",
       "verifiedBy": "real Neon lease write/read/revoke, migration 1 check, 8 local restart tests, and public deployed workflow/receipt retrieval",
@@ -53,7 +53,8 @@
   "liveTransactions": [],
   "publicReceiptIds": [
     "rcpt_3153d596-4458-4612-9dfe-5ac04d12f38e",
-    "rcpt_938380a8-57b5-47a3-a916-81f43cfc37df"
+    "rcpt_938380a8-57b5-47a3-a916-81f43cfc37df",
+    "rcpt_e01e8665-d352-4ea7-9eed-7a5d3a35d946"
   ],
   "reproductionCommands": [
     "npm ci && npm test && npm run typecheck && npm run lint && npm run build",
@@ -75,7 +76,7 @@
     ]
   },
   "limitations": [
-    "No public signed Orion attestation was retrieved for a minted candidate; real live authorization and paid dispatch have not been demonstrated.",
+    "No public signed Orion attestation was retrieved for a minted candidate; REPUTATION_REQUIRED authorization and any paid dispatch have not been demonstrated. IDENTITY_REQUIRED authorization now works against live onchain AgentBound state and is explicitly labeled as not having checked reputation.",
     "No matching Orion worker x402 endpoint and funded payer have been established; the transport is wired and its quote guards are tested, but no live transaction is claimed.",
     "The offline receipt hash is not an issuer signature. Orion-specific credential verification remains NOT_CLAIMED in the offline verifier.",
     "One of 52 catalog checks was UNVERIFIABLE due to a dependency error; it was not reclassified as an identity failure."
