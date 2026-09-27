@@ -18,6 +18,7 @@ const basePolicy: PolicyView = {
   network: "Base",
   maxSpend: "0.10",
   currency: "USDC",
+  policyLevel: "REPUTATION_REQUIRED",
   freshAttestationRequired: true,
   walletMatchRequired: true,
   freshAtDispatchRequired: true,

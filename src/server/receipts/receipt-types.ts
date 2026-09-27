@@ -3,6 +3,7 @@ import type {
   AuthorizationLease,
   ExecutionResult,
   NormalizedCredentialResult,
+  PolicyLevel,
   ResolvedCandidate,
 } from "../types";
 
@@ -40,6 +41,7 @@ export interface HirewallReceipt {
 
   policy: {
     policyHash: string;
+    policyLevel: PolicyLevel;
     result: "PASS" | "FAIL" | "NOT_EVALUATED";
     failureCode?: RefusalCode;
   };

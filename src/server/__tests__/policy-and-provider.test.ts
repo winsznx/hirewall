@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluatePolicy } from "../policy/engine";
+import { evaluatePolicy, policyHash } from "../policy/engine";
 import { FixtureCredentialProvider } from "../providers/fixture-provider";
 import { OrionCredentialProvider } from "../providers/orion-provider";
 import { ProviderUnavailableError } from "../providers/provider";
@@ -11,7 +11,7 @@ function policy(overrides: Partial<BuyerPolicy> = {}): BuyerPolicy {
   return {
     chainId: 8453,
     maxSpendAtomic: "100000",
-    requireValidAttestation: true,
+    policyLevel: "REPUTATION_REQUIRED",
     requireWalletMatch: true,
     requireFreshAtDispatch: true,
     ...overrides,
@@ -66,7 +66,7 @@ describe("deterministic buyer policy (LLM cannot influence this)", () => {
   it("same policy object always hashes identically regardless of key order", () => {
     const a = evaluatePolicy(policy(), verifiedCredential(), "50000", NOW);
     const b = evaluatePolicy(
-      { maxSpendAtomic: "100000", chainId: 8453, requireFreshAtDispatch: true, requireValidAttestation: true, requireWalletMatch: true },
+      { maxSpendAtomic: "100000", chainId: 8453, requireFreshAtDispatch: true, policyLevel: "REPUTATION_REQUIRED", requireWalletMatch: true },
       verifiedCredential(),
       "50000",
       NOW
@@ -97,5 +97,75 @@ describe("provider fail-closed behavior", () => {
   it("fixture provider results are never labeled as the orion providerId", async () => {
     const provider = new FixtureCredentialProvider();
     expect(provider.providerId).not.toBe("orion");
+  });
+});
+
+// Matches OrionCredentialProvider.verifyCandidate()'s real UNVERIFIABLE
+// shape when onchain AgentBound identity checks pass but the signed
+// reputation attestation 404s — see orion-provider.ts.
+function identityOnlyCredential(): NormalizedCredentialResult {
+  return {
+    providerId: "orion",
+    status: "UNVERIFIABLE",
+    checkedAt: NOW,
+    subject: { id: "16", chainId: 8453 },
+    refusalCode: "ATTESTATION_MISSING",
+    checks: [
+      { id: "onchain_agentbound", status: "PASS" },
+      { id: "onchain_reputation", status: "PASS" },
+      { id: "signed_attestation", status: "UNAVAILABLE", code: "ATTESTATION_MISSING" },
+      { id: "wallet_binding", status: "UNAVAILABLE", code: "WALLET_MISMATCH" },
+    ],
+  };
+}
+
+describe("policy level separation (DECISIONS.md DEC-006)", () => {
+  it("IDENTITY_REQUIRED authorizes on onchain identity alone, with no signed credential", () => {
+    const result = evaluatePolicy(policy({ policyLevel: "IDENTITY_REQUIRED" }), identityOnlyCredential(), "50000", NOW);
+    expect(result.ok).toBe(true);
+  });
+
+  it("REPUTATION_REQUIRED refuses the exact same identity-only credential as UNVERIFIABLE", () => {
+    const result = evaluatePolicy(policy({ policyLevel: "REPUTATION_REQUIRED" }), identityOnlyCredential(), "50000", NOW);
+    expect(result.ok).toBe(false);
+    expect(result.failureCode).toBe("ATTESTATION_MISSING");
+  });
+
+  it("IDENTITY_REQUIRED still refuses when onchain AgentBound identity itself fails", () => {
+    const noIdentity: NormalizedCredentialResult = {
+      providerId: "orion",
+      status: "REFUSED",
+      checkedAt: NOW,
+      subject: { id: "999", chainId: 8453 },
+      refusalCode: "AGENTBOUND_MISSING",
+      checks: [{ id: "onchain_agentbound", status: "FAIL", code: "AGENTBOUND_MISSING" }],
+    };
+    const result = evaluatePolicy(policy({ policyLevel: "IDENTITY_REQUIRED" }), noIdentity, "50000", NOW);
+    expect(result.ok).toBe(false);
+    expect(result.failureCode).toBe("AGENTBOUND_MISSING");
+  });
+
+  it("IDENTITY_REQUIRED still enforces the budget cap", () => {
+    const result = evaluatePolicy(
+      policy({ policyLevel: "IDENTITY_REQUIRED", maxSpendAtomic: "1000" }),
+      identityOnlyCredential(),
+      "5000",
+      NOW
+    );
+    expect(result.ok).toBe(false);
+    expect(result.failureCode).toBe("BUDGET_EXCEEDED");
+  });
+
+  it("a fully VERIFIED credential passes under both policy levels", () => {
+    const identity = evaluatePolicy(policy({ policyLevel: "IDENTITY_REQUIRED" }), verifiedCredential(), "50000", NOW);
+    const reputation = evaluatePolicy(policy({ policyLevel: "REPUTATION_REQUIRED" }), verifiedCredential(), "50000", NOW);
+    expect(identity.ok).toBe(true);
+    expect(reputation.ok).toBe(true);
+  });
+
+  it("IDENTITY_REQUIRED and REPUTATION_REQUIRED policies hash differently", () => {
+    const a = policyHash(policy({ policyLevel: "IDENTITY_REQUIRED" }));
+    const b = policyHash(policy({ policyLevel: "REPUTATION_REQUIRED" }));
+    expect(a).not.toBe(b);
   });
 });

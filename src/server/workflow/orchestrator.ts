@@ -5,7 +5,7 @@ import { evaluatePolicy } from "../policy/engine";
 import type { CredentialProvider } from "../providers/provider";
 import { hashObject } from "../policy/hash";
 import { buildReceipt, POLICY_VERSION, VERIFIER_VERSION } from "../receipts/receipt-service";
-import type { BuyerPolicy, DispatchRequest, ResolvedCandidate, WorkflowRecord } from "../types";
+import type { BuyerPolicy, DispatchRequest, PolicyLevel, ResolvedCandidate, WorkflowRecord } from "../types";
 import type { Decision, EvidenceMode, RefusalCode } from "../refusal-codes";
 import { workflowStore } from "./store";
 
@@ -17,6 +17,7 @@ export interface CreateWorkflowInput {
   allowFallback: boolean;
   mode?: "find" | "check";
   category?: string;
+  policyLevel?: PolicyLevel;
 }
 
 const SOFTWARE_COMMIT = process.env.HIREWALL_COMMIT ?? process.env.VERCEL_GIT_COMMIT_SHA ?? "unknown";
@@ -42,13 +43,18 @@ async function pushEvent(workflow: WorkflowRecord, type: string, data: Record<st
   await workflowStore.put(workflow);
 }
 
-function defaultPolicy(chainId: number, maxSpend: string): BuyerPolicy {
+function defaultPolicy(chainId: number, maxSpend: string, policyLevel: PolicyLevel): BuyerPolicy {
+  // requireWalletMatch/requireFreshAtDispatch only mean anything under
+  // REPUTATION_REQUIRED — IDENTITY_REQUIRED never claims to have checked
+  // either, since both are properties of the signed attestation it
+  // doesn't require. See policy/engine.ts and DECISIONS.md DEC-006.
+  const reputation = policyLevel === "REPUTATION_REQUIRED";
   return {
     chainId,
     maxSpendAtomic: maxSpend,
-    requireValidAttestation: true,
-    requireWalletMatch: true,
-    requireFreshAtDispatch: true,
+    policyLevel,
+    requireWalletMatch: reputation,
+    requireFreshAtDispatch: reputation,
   };
 }
 
@@ -81,7 +87,7 @@ export async function createWorkflow(
       allowFallback: input.allowFallback,
     },
     attemptedCandidates: [],
-    policy: defaultPolicy(input.chainId, input.maxSpend),
+    policy: defaultPolicy(input.chainId, input.maxSpend, input.policyLevel ?? "REPUTATION_REQUIRED"),
     execution: { state: "NOT_ATTEMPTED" },
     events: [],
   };
@@ -248,6 +254,7 @@ async function emitReceipt(workflow: WorkflowRecord): Promise<void> {
     },
     policy: {
       policyHash: workflow.policyResult?.policyHash ?? hashObject(workflow.policy),
+      policyLevel: workflow.policy.policyLevel,
       result: workflow.policyResult ? (workflow.policyResult.ok ? "PASS" : "FAIL") : "NOT_EVALUATED",
       failureCode: workflow.policyResult?.failureCode,
     },

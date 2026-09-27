@@ -66,10 +66,13 @@ export interface AuthorizationView {
   policyHash: string;
 }
 
+export type PolicyLevel = "IDENTITY_REQUIRED" | "REPUTATION_REQUIRED";
+
 export interface PolicyView {
   network: "Base";
   maxSpend: string;
   currency: "USDC";
+  policyLevel: PolicyLevel;
   freshAttestationRequired: boolean;
   walletMatchRequired: boolean;
   freshAtDispatchRequired: boolean;
@@ -217,6 +220,7 @@ export interface CreateDispatchInput {
   policyId?: string;
   allowFallback?: boolean;
   workerIdentifier?: string;
+  policyLevel?: PolicyLevel;
 }
 
 export interface ReceiptInput {

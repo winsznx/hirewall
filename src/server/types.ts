@@ -51,12 +51,21 @@ export interface NormalizedCredentialResult {
   refusalCode?: RefusalCode;
 }
 
+// IDENTITY_REQUIRED accepts the authoritative onchain AgentBound identity
+// state (existence, mint, not-slashed) as sufficient — it never claims to
+// have checked Orion's signed reputation attestation. REPUTATION_REQUIRED
+// is the original strict flow: identity plus a fresh, signature-verified
+// attestation binding the candidate to a specific wallet. Both are
+// explicit, buyer-selected requirements, not a silent weakening of one
+// into the other — see DECISIONS.md DEC-006.
+export type PolicyLevel = "IDENTITY_REQUIRED" | "REPUTATION_REQUIRED";
+
 export interface BuyerPolicy {
   chainId: number;
   maxSpendAtomic: string;
-  requireValidAttestation: true;
-  requireWalletMatch: true;
-  requireFreshAtDispatch: true;
+  policyLevel: PolicyLevel;
+  requireWalletMatch: boolean;
+  requireFreshAtDispatch: boolean;
   minimumTier?: string;
   minimumCompositeScore?: number;
 }

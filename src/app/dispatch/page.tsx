@@ -22,6 +22,7 @@ export default function DispatchWorkspacePage() {
   const [category, setCategory] = useState("");
   const [allowFallback, setAllowFallback] = useState(true);
   const [workerIdentifier, setWorkerIdentifier] = useState("");
+  const [policyLevel, setPolicyLevel] = useState<"IDENTITY_REQUIRED" | "REPUTATION_REQUIRED">("REPUTATION_REQUIRED");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -38,6 +39,7 @@ export default function DispatchWorkspacePage() {
         category: category || undefined,
         allowFallback,
         workerIdentifier: mode === "check" ? workerIdentifier : undefined,
+        policyLevel,
       });
       router.push(`/dispatch/${workflowId}`);
     } catch (error) {
@@ -101,6 +103,26 @@ export default function DispatchWorkspacePage() {
             />
           </div>
         ) : null}
+
+        <div>
+          <label htmlFor="policyLevel" className="block text-[13px] font-medium text-ink">
+            Required worker proof
+          </label>
+          <select
+            id="policyLevel"
+            value={policyLevel}
+            onChange={(e) => setPolicyLevel(e.target.value as "IDENTITY_REQUIRED" | "REPUTATION_REQUIRED")}
+            className="mt-1.5 w-full rounded-md border border-border-strong bg-canvas px-3 py-2 text-[14px] text-ink outline-none focus:border-accent"
+          >
+            <option value="REPUTATION_REQUIRED">Reputation required — onchain identity + fresh signed attestation</option>
+            <option value="IDENTITY_REQUIRED">Identity only — onchain AgentBound state, no signed reputation claim</option>
+          </select>
+          <p className="mt-1.5 text-[12px] text-ink-muted">
+            {policyLevel === "REPUTATION_REQUIRED"
+              ? "Strict. Currently refuses every real candidate as UNVERIFIABLE — Orion's signed attestation endpoint is unavailable for sampled agents."
+              : "Authorizes on Base-verified AgentBound identity alone. Never claims to have checked wallet binding or reputation freshness."}
+          </p>
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>

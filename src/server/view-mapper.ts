@@ -32,7 +32,8 @@ function mapPolicy(policy: BuyerPolicy, policyHash?: string): PolicyView {
     network: "Base",
     maxSpend: formatUsdc(policy.maxSpendAtomic),
     currency: "USDC",
-    freshAttestationRequired: policy.requireValidAttestation,
+    policyLevel: policy.policyLevel,
+    freshAttestationRequired: policy.policyLevel === "REPUTATION_REQUIRED",
     walletMatchRequired: policy.requireWalletMatch,
     freshAtDispatchRequired: policy.requireFreshAtDispatch,
     minimumTier: policy.minimumTier,
@@ -151,9 +152,9 @@ export function mapReceipt(receipt: ServerReceipt): ClientReceipt {
       {
         chainId: receipt.request.chainId,
         maxSpendAtomic: receipt.request.maxSpendAtomic,
-        requireValidAttestation: true,
-        requireWalletMatch: true,
-        requireFreshAtDispatch: true,
+        policyLevel: receipt.policy.policyLevel,
+        requireWalletMatch: receipt.policy.policyLevel === "REPUTATION_REQUIRED",
+        requireFreshAtDispatch: receipt.policy.policyLevel === "REPUTATION_REQUIRED",
       },
       receipt.policy.policyHash
     ),

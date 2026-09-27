@@ -139,7 +139,7 @@ describe("persistence survives a simulated process restart", () => {
         subject: { id: "cand_restart" },
         checks: [{ id: "signature", status: "PASS" }],
       },
-      policy: { policyHash: "0xabc", result: "PASS" },
+      policy: { policyHash: "0xabc", policyLevel: "REPUTATION_REQUIRED", result: "PASS" },
       decision: "AUTHORIZE",
       authorization: {
         id: "lease_restart_receipt",
@@ -204,7 +204,7 @@ describe("persistence survives a simulated process restart", () => {
         checks: [],
         refusalCode: "SIGNATURE_INVALID",
       },
-      policy: { policyHash: "0xabc", result: "FAIL", failureCode: "SIGNATURE_INVALID" },
+      policy: { policyHash: "0xabc", policyLevel: "REPUTATION_REQUIRED", result: "FAIL", failureCode: "SIGNATURE_INVALID" },
       decision: "REFUSE",
       refusalCode: "SIGNATURE_INVALID",
       execution: { state: "NOT_ATTEMPTED" },

@@ -11,12 +11,14 @@ export async function POST(request: Request) {
   const task = typeof input.task === "string" ? input.task.trim() : "";
   const target = input.target ?? input.workerIdentifier;
   const mode = input.mode ?? (target ? "check" : "find");
+  const policyLevel = input.policyLevel ?? "REPUTATION_REQUIRED";
   if (!task || task.length > 2000 || typeof input.maxSpend !== "string" || input.maxSpend.length > 32 || !/^\d+$/.test(input.maxSpend) ||
       BigInt(input.maxSpend) === BigInt(0) || input.chainId !== 8453 ||
       (mode !== "find" && mode !== "check") || (mode === "check" && (typeof target !== "string" || !target.trim())) ||
       (target !== undefined && (typeof target !== "string" || target.length > 200)) ||
       (input.category !== undefined && (typeof input.category !== "string" || input.category.length > 100)) ||
-      (input.allowFallback !== undefined && typeof input.allowFallback !== "boolean")) {
+      (input.allowFallback !== undefined && typeof input.allowFallback !== "boolean") ||
+      (policyLevel !== "IDENTITY_REQUIRED" && policyLevel !== "REPUTATION_REQUIRED")) {
     return NextResponse.json({ error: "invalid_request" }, { status: 400 });
   }
 
@@ -31,6 +33,7 @@ export async function POST(request: Request) {
       allowFallback: input.allowFallback === true,
       mode,
       category: typeof input.category === "string" ? input.category : undefined,
+      policyLevel,
     },
     provider,
     evidenceMode

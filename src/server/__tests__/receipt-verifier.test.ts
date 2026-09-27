@@ -16,7 +16,7 @@ function baseInput(overrides: Partial<ReceiptInputForBuild> = {}): ReceiptInputF
       subject: { id: "cand_1" },
       checks: [{ id: "signature", status: "PASS" }],
     },
-    policy: { policyHash: "0xabc", result: "PASS" },
+    policy: { policyHash: "0xabc", policyLevel: "REPUTATION_REQUIRED", result: "PASS" },
     decision: "AUTHORIZE",
     execution: { state: "NOT_ATTEMPTED" },
     software: { commit: "test", verifierVersion: VERIFIER_VERSION, policyVersion: POLICY_VERSION },

@@ -51,6 +51,7 @@ export class RemoteHirewallApi implements HirewallApi {
         mode: input.mode,
         category: input.category,
         allowFallback: input.allowFallback ?? false,
+        policyLevel: input.policyLevel ?? "REPUTATION_REQUIRED",
       }),
     });
     if (!res.ok) throw new Error(`createDispatch failed: ${res.status}`);
