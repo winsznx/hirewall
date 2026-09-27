@@ -1,66 +1,32 @@
-# HIREWALL — Setup
+# HIREWALL setup
 
-## Frontend and backend
+Requires Node.js 24 and npm. The local backend uses SQLite; production uses Neon Postgres. Keep `.env.local` out of git.
 
 ```bash
-npm install
-npm run dev      # http://localhost:3000, uses the real /api routes
-npm run build
+npm ci
+npm test
+npm run typecheck
 npm run lint
-npx tsc --noEmit
+npm run build
+npm run dev
 ```
 
-The frontend calls this application's `/api` routes by default. For a
-separate backend origin, set `NEXT_PUBLIC_HIREWALL_API_URL`. Static frontend
-fixtures require `NEXT_PUBLIC_HIREWALL_USE_FIXTURES=true` in development;
-production builds reject that setting. The default Orion provider currently
-fails closed until a real credential source and verifier are integrated.
+The frontend calls this app's `/api` routes by default. `ORION_API_BASE_URL` and `BASE_RPC_URL` may override the public Orion and Base URLs. Store discovery, AgentBound reads, and EIP-191 attestation verification are wired. The sampled minted agents' public attestation endpoints currently return 404, so the live provider returns `UNVERIFIABLE` and creates no lease.
 
-## Backend
+For explicitly labeled local fixture work, set `HIREWALL_PROVIDER=fixture NEXT_PUBLIC_HIREWALL_USE_FIXTURES=true`. Production rejects both fixture selection paths.
 
-```bash
-npm run test      # 54 deterministic invariant tests (vitest), no network required
-```
+## Persistence
 
-The enforcement mechanism (policy engine, authorization lease, executor,
-receipts, workflow orchestrator, `/api/*` routes) is implemented, durable,
-and tested — see `ARCHITECTURE.md`. The Orion credential integration
-now resolves live Store agents, reads Base AgentBound state, and checks the
-documented EIP-191 attestation. The sampled minted agents currently return
-404 for signed attestations, so they remain `UNVERIFIABLE` with no lease.
-See `GATES.md` GATE-001-R2 and `DECISIONS.md` DEC-006.
+Local SQLite defaults to `.data/hirewall.sqlite`. Set `HIREWALL_DB_PATH` to change it. Vercel production requires `DATABASE_URL`, provisioned by the Neon Marketplace integration. Missing credentials fail closed. Postgres schema migration 1 creates leases, consumed nonces, execution claims, workflows, receipts, and catalog runs. Run `npm run db:migrate` with `DATABASE_URL` set to check the migration. The first database request also applies the idempotent migration. `HIREWALL_DB_BACKEND=neon` lets local verification use Neon.
 
-To run the backend against fixtures locally:
+## Live catalog
 
-```bash
-HIREWALL_PROVIDER=fixture npm run dev
-```
+`npm run catalog:run` fetches the current Orion Store, hashes and freezes its raw cohort in Neon, screens every listing through the real workflow, persists receipts, and updates the catalog page. It requires `DATABASE_URL` and network access. Run it with `HIREWALL_DB_BACKEND=neon` outside production. Earlier runs remain stored for audit.
 
-The frontend will use these routes automatically. This server-side fixture
-setting is for local development only. Omitting `HIREWALL_PROVIDER` selects
-`OrionCredentialProvider`, which requires live Store, Base, and signed
-attestation evidence and fails closed when any load-bearing proof is missing.
+## x402 execution
 
-### Persistence
+The executor checks the lease, fetches an HTTP 402 quote, verifies Base USDC, the authorized recipient wallet and price cap, rechecks the lease, atomically claims it, then signs and sends through the x402 SDK. Set an HTTPS `HIREWALL_X402_ENDPOINT` and a funded `HIREWALL_PAYER_PRIVATE_KEY` only for a seller whose quote `payTo` matches the selected Orion candidate's attested wallet. Missing configuration returns `NOT_ATTEMPTED` without consuming the lease. No such live signed candidate and matching seller has yet been proven.
 
-State (leases, revocation, replay nonces, executions, workflows,
-receipts) is durable via `node:sqlite` — see `ARCHITECTURE.md` and
-`DECISIONS.md` DEC-005. Controlled by:
+## Receipts
 
-```bash
-HIREWALL_DB_PATH=./.data/hirewall.sqlite   # default; ":memory:" is used automatically in tests
-```
-
-The `.data/` directory is gitignored — delete it to reset all local
-state. **Not yet needed, and will only be requested when actually
-deploying**: a hosted Postgres connection string (e.g. via the Vercel
-Marketplace), required only for a horizontally-scaled deployment where a
-local SQLite file can't be shared across serverless instances. That swap
-touches only `src/server/persistence/`.
-
-## Evidence / reproduction scripts
-
-`/scripts` and `pnpm verify:*` / `pnpm evidence:*` commands referenced in
-`HIREWALL_PRD.md` section 25 do not exist yet. They will be added as the
-corresponding backend module ships, each with a working reproduction path
-before being documented here as available.
+`npm run verify:receipt -- <path|url|->` checks a public raw receipt offline. Use `/api/receipts/<id>?format=raw` for the complete artifact. The verifier checks HIREWALL receipt integrity and structure; Orion-specific signature verification remains `NOT_CLAIMED` until a real signed artifact is available.

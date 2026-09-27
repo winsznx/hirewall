@@ -1,7 +1,7 @@
-import type { RefusalCode } from "../refusal-codes";
 import { consumeLease, validateLease } from "../authorization/lease-service";
 import { executionRepo } from "../persistence/execution-repo";
 import type { DispatchRequest, ExecutionResult } from "../types";
+import { x402Transport } from "./x402-transport";
 
 // The only module allowed to touch the paid-dispatch signer/wallet. There
 // is exactly one public method. It cannot be called without a leaseId,
@@ -26,42 +26,37 @@ export class Executor {
   // a real endpoint. Production wiring (once GATE-001 unblocks) passes
   // the real x402 call here; nothing about validateLease()/the claim/
   // consumeLease() below changes.
-  constructor(private readonly transport: PaymentTransport = defaultUnavailableTransport) {}
+  constructor(private readonly transport?: PaymentTransport) {}
 
   async dispatch(request: DispatchRequest, leaseId: string, now: string): Promise<ExecutionResult> {
-    const validation = validateLease(leaseId, request, now);
+    const validation = await validateLease(leaseId, request, now);
     if (!validation.ok) {
       return { state: "NOT_ATTEMPTED", errorCode: validation.failureCode };
     }
 
-    const claimed = executionRepo.tryClaim(leaseId, now);
+    const preparation = this.transport ? undefined : await x402Transport.prepare(request);
+    if (preparation && !preparation.ok) return preparation.result;
+    if (preparation) {
+      const current = await validateLease(leaseId, request, new Date().toISOString());
+      if (!current.ok) return { state: "NOT_ATTEMPTED", errorCode: current.failureCode };
+    }
+
+    const claimed = await executionRepo.tryClaim(leaseId, now);
     if (!claimed) {
       return { state: "NOT_ATTEMPTED", errorCode: "REPLAY_REJECTED" };
     }
 
-    const consumed = consumeLease(leaseId, now);
+    const consumed = await consumeLease(leaseId, now);
     if (!consumed) {
       // Should be unreachable given the claim above already serializes
       // concurrent attempts, but fail closed rather than assume.
       return { state: "NOT_ATTEMPTED", errorCode: "REPLAY_REJECTED" };
     }
 
-    const result = await this.transport(request);
-    executionRepo.recordResult(leaseId, result);
+    const result = this.transport ? await this.transport(request) : await x402Transport.execute(preparation!.quote, request);
+    await executionRepo.recordResult(leaseId, result);
     return result;
   }
-}
-
-// x402 payment transport. Real endpoint not wired yet — Orion's x402
-// surface is blocked behind GATE-001 (see GATES.md). Default behavior
-// fails closed and honestly rather than simulating success. Its output
-// is never reported as live Orion volume — see BUILD_CONTRACT.md section 5.
-async function defaultUnavailableTransport(request: DispatchRequest): Promise<ExecutionResult> {
-  void request;
-  return {
-    state: "NOT_ATTEMPTED",
-    errorCode: "DEPENDENCY_UNAVAILABLE" as RefusalCode,
-  };
 }
 
 export const executor = new Executor();

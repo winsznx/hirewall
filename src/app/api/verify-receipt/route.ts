@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   let receipt: HirewallReceipt | undefined;
 
   if (body.receiptId) {
-    receipt = getReceipt(body.receiptId);
+    receipt = await getReceipt(body.receiptId);
   } else if (body.receiptJson) {
     try {
       receipt = JSON.parse(body.receiptJson) as HirewallReceipt;

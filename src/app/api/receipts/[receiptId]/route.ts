@@ -10,7 +10,7 @@ import { mapReceipt } from "@/server/view-mapper";
 // BUILD_CONTRACT.md section 17.
 export async function GET(request: Request, { params }: { params: Promise<{ receiptId: string }> }) {
   const { receiptId } = await params;
-  const receipt = getReceipt(receiptId);
+  const receipt = await getReceipt(receiptId);
 
   if (!receipt) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });

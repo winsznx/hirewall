@@ -35,7 +35,7 @@ export class OrionCredentialProvider implements CredentialProvider<{ slug?: stri
   private readonly baseUrl: string;
   private readonly client = createPublicClient({
     chain: base,
-    transport: http(process.env.BASE_RPC_URL ?? "https://mainnet.base.org"),
+    transport: http(process.env.BASE_RPC_URL ?? "https://base-rpc.publicnode.com"),
   });
 
   constructor(baseUrl = "https://orionagents.org") {

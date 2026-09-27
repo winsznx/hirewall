@@ -6,7 +6,7 @@ import type { HirewallReceipt, ReceiptInputForBuild } from "./receipt-types";
 export const VERIFIER_VERSION = "0.1.0";
 export const POLICY_VERSION = "0.1.0";
 
-export function buildReceipt(input: ReceiptInputForBuild): HirewallReceipt {
+export async function buildReceipt(input: ReceiptInputForBuild): Promise<HirewallReceipt> {
   const createdAt = input.createdAt ?? new Date().toISOString();
   const withoutHash: Omit<HirewallReceipt, "receiptHash"> = {
     schemaVersion: "1.0",
@@ -16,10 +16,10 @@ export function buildReceipt(input: ReceiptInputForBuild): HirewallReceipt {
   };
   const receiptHash = hashObject(withoutHash);
   const receipt: HirewallReceipt = { ...withoutHash, receiptHash };
-  receiptRepo.put(receipt);
+  await receiptRepo.put(receipt);
   return receipt;
 }
 
-export function getReceipt(receiptId: string): HirewallReceipt | undefined {
+export function getReceipt(receiptId: string): Promise<HirewallReceipt | undefined> {
   return receiptRepo.get(receiptId);
 }

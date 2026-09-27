@@ -35,6 +35,12 @@ export function verifyReceipt(receipt: HirewallReceipt): ReceiptVerificationOutc
     status: hashOk ? "PASS" : "FAIL",
     detail: hashOk ? undefined : `expected ${receiptHash}, recomputed ${recomputedHash}`,
   });
+  checks.push({
+    id: "receipt_authenticity",
+    label: "Receipt issuer authenticity",
+    status: "NOT_CLAIMED",
+    detail: "The receipt hash detects accidental or unsynchronized edits; it is not a signed issuer credential.",
+  });
 
   // 2. Schema/version.
   checks.push({
@@ -100,7 +106,7 @@ export function verifyReceipt(receipt: HirewallReceipt): ReceiptVerificationOutc
     status: "NOT_CLAIMED",
     detail:
       receipt.provider.providerId === "orion"
-        ? "Orion integration blocked by GATE-001 — see GATES.md. This receipt cannot independently prove Orion-specific credential truth."
+        ? "This offline receipt does not independently prove the current Orion oracle and signature. See GATES.md for the live evidence boundary."
         : `Provider "${receipt.provider.providerId}" is not Orion; this claim only ever applies to the real Orion integration.`,
   });
 

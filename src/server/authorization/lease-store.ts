@@ -6,31 +6,31 @@ import type { AuthorizationLease } from "../types";
 // revocation, and nonce-consumption state survive a process restart.
 // See DECISIONS.md DEC-005.
 class LeaseStore {
-  put(lease: AuthorizationLease): void {
-    leaseRepo.put(lease);
+  async put(lease: AuthorizationLease): Promise<void> {
+    await leaseRepo.put(lease);
   }
 
-  get(id: string): AuthorizationLease | undefined {
+  get(id: string): Promise<AuthorizationLease | undefined> {
     return leaseRepo.get(id);
   }
 
-  revoke(id: string): void {
-    leaseRepo.revoke(id);
+  async revoke(id: string): Promise<void> {
+    await leaseRepo.revoke(id);
   }
 
-  isNonceConsumed(nonce: string): boolean {
+  isNonceConsumed(nonce: string): Promise<boolean> {
     return leaseRepo.isNonceConsumed(nonce);
   }
 
   // Returns whether this call was the one that consumed the nonce.
   // false means someone already consumed it — callers must treat that as
   // a replay rather than proceeding.
-  consumeNonce(nonce: string, consumedAt: string): boolean {
+  consumeNonce(nonce: string, consumedAt: string): Promise<boolean> {
     return leaseRepo.consumeNonce(nonce, consumedAt);
   }
 
-  markConsumed(id: string, consumedAt: string): void {
-    leaseRepo.markConsumed(id, consumedAt);
+  async markConsumed(id: string, consumedAt: string): Promise<void> {
+    await leaseRepo.markConsumed(id, consumedAt);
   }
 }
 

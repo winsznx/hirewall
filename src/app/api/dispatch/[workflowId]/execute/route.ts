@@ -7,7 +7,7 @@ import { mapWorkflow } from "@/server/view-mapper";
 // src/server/executor/executor.ts. This route never bypasses that.
 export async function POST(_request: Request, { params }: { params: Promise<{ workflowId: string }> }) {
   const { workflowId } = await params;
-  const workflow = getWorkflow(workflowId);
+  const workflow = await getWorkflow(workflowId);
 
   if (!workflow) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });

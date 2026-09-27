@@ -289,3 +289,11 @@ repository interfaces replaces the SQLite one — see `SETUP.md` for the
 minimum credential that will be requested at that point, and
 `ARCHITECTURE.md` for the documented limitation this decision does not
 hide.
+
+## DEC-007 — Production persistence and live cohort (2026-09-27)
+
+The Vercel project `solidworkssas-projects/hirewall` now has a provisioned Neon resource. The production repository path uses Neon Postgres; local deterministic tests remain on SQLite. Repository operations and all callers were made asynchronous so production leases, revocations, nonces, execution claims, workflows, receipts, and catalog runs share one durable store across function instances. Unique primary keys protect execution and nonce claims. A real Neon lease write/read/revoke smoke test passed. `DATABASE_URL` is an environment secret and never committed.
+
+The live Orion Store is the candidate discovery source. The catalog runner stores a frozen snapshot and SHA-256 hash, then evaluates every listing through the same workflow. A Store listing alone is baseline eligibility; HIREWALL requires a minted, non-slashed AgentBound state and a fresh oracle-signed wallet attestation to create a lease. The 2026-09-27 run found 52 listings, 48 missing AgentBound identity and 4 unverifiable, with zero authorizations. This includes Rigel and AUDIT: both have onchain identity, but their signed attestation endpoints return 404. The result is evidence of fail-closed enforcement, not a claim that a live signed authorization works.
+
+The x402 transport checks a Base USDC quote against the authorized recipient and budget before consuming a lease, then rechecks the lease and uses the official x402 SDK. No matching Orion worker endpoint and funded payer have been established, so no paid settlement is claimed.

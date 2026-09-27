@@ -32,6 +32,8 @@ export class FixtureHirewallApi implements HirewallApi {
 
   subscribeToDispatch(_id: string, _onEvent: (event: WorkflowEvent) => void): () => void {
     // Fixtures are static snapshots; there is no live event stream to replay.
+    void _id;
+    void _onEvent;
     return () => {};
   }
 

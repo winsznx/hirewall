@@ -158,3 +158,13 @@ now implemented and tested — see `ARCHITECTURE.md` and `CLAIMS.md`. Gate
 10 is partially done. This is exactly the `BUILD_CONTRACT.md` section 6
 carve-out (a separate explicitly labeled deterministic fixture path)
 being exercised while GATE-001 stays blocked.
+
+## GATE-001-R3 — Full live Store cohort (2026-09-27)
+
+Status: **CONDITIONAL_PASS for Store discovery, onchain AgentBound identity, and fail-closed screening; FAIL for a live signed authorization.** The previous outage observations above are historical.
+
+A live `/api/agents` response contained 52 entries. Its exact response bytes hash to `sha256:11e825da496ca4ca41543533c1584839a89d0e201cdf1400dcca1a422d278f96`. The runner persisted the snapshot and screened all 52 through production workflow code against Base RPC. Result: 48 `REFUSE` (`AGENTBOUND_MISSING`), 4 `UNVERIFIABLE` (three `ATTESTATION_MISSING`, one `DEPENDENCY_UNAVAILABLE`), 0 `AUTHORIZE`. Each candidate has a persisted receipt. Rigel and AUDIT are minted but their public signed attestation API returns 404; they received `UNVERIFIABLE`, not a lease. The one dependency error remains a dependency error, not an inferred identity failure.
+
+Artifacts: `evidence/campaign/catalog-2026-09-27/` holds exact raw Store bytes, exported snapshot, run record, and Rigel's raw receipt. The hash can be reproduced with `shasum -a 256 store-raw.json`. The catalog web page reads the persisted run from Neon. This is a cohort observation at its timestamp, not a claim about every Orion agent forever.
+
+Still unproven: a live signed Orion artifact, independent verification of its oracle signature and wallet binding, an active live lease, and a paid x402 settlement to a matching worker. These require Orion to expose a signed credential for a live Store candidate and a compatible seller endpoint; payment additionally requires a funded payer.

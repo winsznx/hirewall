@@ -20,11 +20,21 @@ Claim: BLOCKED_BY_GATE_001 — Orion attestation signature was independently ver
 Claim: BLOCKED_BY_GATE_001 — Orion signer/oracle identity was confirmed as expected
 Claim: BLOCKED_BY_GATE_001 — a candidate's wallet was checked against its live Orion credential
 Claim: BLOCKED_BY_GATE_001 — a live Orion credential's freshness/expiry was verified at dispatch
-Claim: BLOCKED_BY_GATE_001 — a frozen Store/catalog cohort was run against real Orion listings
 Claim: BLOCKED_BY_GATE_001 — a real Orion x402 paid dispatch occurred
 ```
 
 ## What can be honestly claimed today
+
+```text
+Claim: a frozen live Orion Store cohort was screened by HIREWALL on 2026-09-27
+Artifact: evidence/campaign/catalog-2026-09-27/store-raw.json and run.json
+Evidence path: evidence/campaign/catalog-2026-09-27/
+Evidence class: live | comparative
+Denominator: 52 Store listings in the exact hashed response
+Result: 48 REFUSE (AgentBound missing), 4 UNVERIFIABLE (3 signed attestations missing, 1 dependency error), 0 AUTHORIZE
+Limitations: the first run was affected by a public RPC rate limit; the reported run used a verified alternate public RPC. It still does not establish a signed live credential or paid execution.
+Reproduction: shasum -a 256 evidence/campaign/catalog-2026-09-27/store-raw.json; npm run catalog:run with DATABASE_URL
+```
 
 ```text
 Claim: Orion's restored Store lists real agents Rigel (ID 16) and AUDIT (ID 18), and both have minted AgentBound tokens on Base
@@ -39,7 +49,7 @@ Reproduction: GET https://orionagents.org/api/agents; cast call <contract> 'exis
 ```text
 Claim: HIREWALL enforces a bounded, expiring authorization lease before any paid dispatch attempt
 Artifact: src/server/authorization/lease-service.ts, src/server/executor/executor.ts
-Evidence path: src/server/__tests__/lease-executor-invariants.test.ts (34 passing invariant tests)
+Evidence path: src/server/__tests__/lease-executor-invariants.test.ts and x402-preflight.test.ts (58 passing tests overall)
 Evidence class: deterministic
 Denominator: n/a (mechanism proof, not a sample)
 Limitations: exercises the fixture credential provider, not a live Orion credential. See DECISIONS.md DEC-004.
@@ -72,7 +82,7 @@ Artifact: src/server/persistence/ (SQLite-backed repositories)
 Evidence path: src/server/__tests__/persistence-restart.test.ts (8 passing tests)
 Evidence class: deterministic
 Denominator: n/a
-Limitations: verified for a single-instance restart against a local SQLite file. Does not establish behavior across multiple concurrent serverless instances sharing a real hosted database — that requires the Postgres-backed repository implementation described in DECISIONS.md DEC-005, not yet built.
+Limitations: eight deterministic restart tests use local SQLite. A real Neon write/read/revoke smoke test passed; multi-instance race testing is still outstanding.
 Reproduction: npm run test; or, for a real compiled-server smoke test: npm run build && HIREWALL_PROVIDER=fixture HIREWALL_DB_PATH=./.data/x.sqlite npm run start, create a workflow, kill and restart the process, re-fetch it.
 ```
 

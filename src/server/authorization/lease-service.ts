@@ -22,7 +22,7 @@ export interface CreateLeaseInput {
 // deterministic verification AND deterministic policy evaluation both
 // pass — see src/server/workflow/orchestrator.ts. No LLM output reaches
 // this function.
-export function createLease(input: CreateLeaseInput): AuthorizationLease {
+export async function createLease(input: CreateLeaseInput): Promise<AuthorizationLease> {
   const issuedAtMs = Date.parse(input.now);
   const credentialExpiryMs = input.credentialExpiresAt ? Date.parse(input.credentialExpiresAt) : undefined;
 
@@ -48,7 +48,7 @@ export function createLease(input: CreateLeaseInput): AuthorizationLease {
     revoked: false,
   };
 
-  leaseStore.put(lease);
+  await leaseStore.put(lease);
   return lease;
 }
 
@@ -61,13 +61,13 @@ export interface LeaseValidationResult {
 // now." Looks the lease up by ID from the store — never trusts a
 // caller-supplied lease payload — and checks every binding in
 // BUILD_CONTRACT.md section 3's canDispatch() definition.
-export function validateLease(leaseId: string, request: DispatchRequest, now: string): LeaseValidationResult {
-  const lease = leaseStore.get(leaseId);
+export async function validateLease(leaseId: string, request: DispatchRequest, now: string): Promise<LeaseValidationResult> {
+  const lease = await leaseStore.get(leaseId);
 
   if (!lease) return { ok: false, failureCode: "AUTHORIZATION_REVOKED" };
   if (lease.revoked) return { ok: false, failureCode: "AUTHORIZATION_REVOKED" };
   if (lease.consumedAt) return { ok: false, failureCode: "REPLAY_REJECTED" };
-  if (leaseStore.isNonceConsumed(lease.nonce)) return { ok: false, failureCode: "REPLAY_REJECTED" };
+  if (await leaseStore.isNonceConsumed(lease.nonce)) return { ok: false, failureCode: "REPLAY_REJECTED" };
   if (Date.parse(lease.expiresAt) <= Date.parse(now)) return { ok: false, failureCode: "AUTHORIZATION_EXPIRED" };
   if (lease.contextId !== request.contextId) return { ok: false, failureCode: "AUTHORIZATION_REVOKED" };
   if (lease.candidateId !== request.candidateId) return { ok: false, failureCode: "WALLET_MISMATCH" };
@@ -90,19 +90,19 @@ export function validateLease(leaseId: string, request: DispatchRequest, now: st
 // caller — the executor's actual atomicity boundary is the executions
 // table claim (see executor.ts), but this return value lets any other
 // caller detect the same race honestly rather than silently succeeding.
-export function consumeLease(leaseId: string, consumedAt: string): boolean {
-  const lease = leaseStore.get(leaseId);
+export async function consumeLease(leaseId: string, consumedAt: string): Promise<boolean> {
+  const lease = await leaseStore.get(leaseId);
   if (!lease) return false;
-  const claimed = leaseStore.consumeNonce(lease.nonce, consumedAt);
+  const claimed = await leaseStore.consumeNonce(lease.nonce, consumedAt);
   if (!claimed) return false;
-  leaseStore.markConsumed(leaseId, consumedAt);
+  await leaseStore.markConsumed(leaseId, consumedAt);
   return true;
 }
 
-export function revokeLease(leaseId: string): void {
-  leaseStore.revoke(leaseId);
+export async function revokeLease(leaseId: string): Promise<void> {
+  await leaseStore.revoke(leaseId);
 }
 
-export function getLease(leaseId: string): AuthorizationLease | undefined {
+export function getLease(leaseId: string): Promise<AuthorizationLease | undefined> {
   return leaseStore.get(leaseId);
 }

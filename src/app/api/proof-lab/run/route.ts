@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
   if (scenario.replay && workflow.authorization) {
     await executeWorkflow(workflow);
-    const secondAttempt = await executeWorkflow(getWorkflow(workflow.id)!);
+    const secondAttempt = await executeWorkflow((await getWorkflow(workflow.id))!);
     return NextResponse.json({
       scenario: { id: scenarioId, label: scenario.label, description: scenario.description },
       mutation: { description: "Second execute() call reusing the same lease ID", expected: "REPLAY_REJECTED", observed: secondAttempt.execution.errorCode ?? "none" },
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
   }
 
   if (scenario.tamperReceipt && workflow.receiptId) {
-    const receipt = getReceipt(workflow.receiptId);
+    const receipt = await getReceipt(workflow.receiptId);
     if (receipt) {
       const tampered = { ...receipt, decision: "AUTHORIZE" as const, refusalCode: undefined };
       const outcome = verifyReceipt(tampered);

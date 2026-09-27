@@ -1,36 +1,26 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HIREWALL
 
-## Getting Started
+**No valid AgentBound authorization, no dispatch.** HIREWALL resolves a worker from Orion, checks the current AgentBound identity and signed reputation attestation, applies a buyer mandate, and issues a short-lived lease that gates x402 execution.
 
-First, run the development server:
+The current public Orion Store and Base registry are reachable. For sampled minted agents, Orion's signed attestation API returns 404. HIREWALL therefore produces an `UNVERIFIABLE` receipt and creates no payment authority. The [claim ledger](CLAIMS.md) and [gate report](GATES.md) distinguish this live observation from deterministic fixture tests.
+
+## Run
 
 ```bash
+npm ci
+npm test
+npm run typecheck
+npm run lint
+npm run build
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+See [setup](SETUP.md) for Neon, catalog, x402 and receipt commands. The production app uses real API routes by default. The explicitly labeled Proof Lab uses controlled fixtures; it is not live Orion proof.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Verify a receipt
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run verify:receipt -- /path/to/receipt.json
+```
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+A public receipt can be downloaded from `/api/receipts/<id>?format=raw`. The verifier recomputes HIREWALL receipt integrity and reports Orion credential verification as `NOT_CLAIMED` until a signed live artifact is available.

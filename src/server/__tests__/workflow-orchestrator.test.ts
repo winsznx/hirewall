@@ -10,6 +10,21 @@ import { getReceipt } from "../receipts/receipt-service";
 const provider = new FixtureCredentialProvider();
 
 describe("workflow orchestrator", () => {
+  it("removing the credential result for the same candidate prevents lease creation", async () => {
+    const input = { task: "same task", maxSpend: "100000", chainId: 8453, workerIdentifier: "fixture-valid", allowFallback: false };
+    const baseline = await createWorkflow(input, provider as never, "fixture");
+    const unavailable = Object.assign(new FixtureCredentialProvider(), {
+      verifyCandidate: async () => ({ providerId: "fixture", status: "UNVERIFIABLE" as const,
+        checkedAt: new Date().toISOString(), subject: { id: "fixture-valid" }, checks: [],
+        refusalCode: "ATTESTATION_MISSING" as const }),
+    });
+    const ablation = await createWorkflow(input, unavailable as never, "fault_injection");
+    expect(baseline.candidate?.id).toBe(ablation.candidate?.id);
+    expect(baseline.authorization).toBeDefined();
+    expect(ablation.authorization).toBeUndefined();
+    expect(ablation.decision).toBe("UNVERIFIABLE");
+  });
+
   it("find mode uses real candidate matching and falls back after a refusal", async () => {
     const discoveryProvider = Object.assign(new FixtureCredentialProvider(), {
       matchCandidates: async () => [
@@ -68,7 +83,7 @@ describe("workflow orchestrator", () => {
       "fixture"
     );
     expect(workflow.receiptId).toBeDefined();
-    const receipt = getReceipt(workflow.receiptId!);
+    const receipt = await getReceipt(workflow.receiptId!);
     expect(receipt).toBeDefined();
     expect(receipt?.decision).toBe("REFUSE");
   });
@@ -84,7 +99,7 @@ describe("workflow orchestrator", () => {
     // Default executor transport is the honest "no real endpoint" path —
     // exercising it here proves decision and settlement stay separate
     // fields rather than collapsing into one status.
-    const executed = await executeWorkflow(getWorkflow(workflow.id)!);
+    const executed = await executeWorkflow((await getWorkflow(workflow.id))!);
     expect(executed.decision).toBe("AUTHORIZE");
     expect(executed.execution.state).not.toBe("SUCCEEDED");
   });

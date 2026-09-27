@@ -25,8 +25,8 @@ function baseInput(overrides: Partial<ReceiptInputForBuild> = {}): ReceiptInputF
 }
 
 describe("receipt verifier recomputation", () => {
-  it("a genuine receipt's hash recomputes to PASS", () => {
-    const receipt = buildReceipt(
+  it("a genuine receipt's hash recomputes to PASS", async () => {
+    const receipt = await buildReceipt(
       baseInput({
         authorization: {
           id: "lease_1",
@@ -49,8 +49,8 @@ describe("receipt verifier recomputation", () => {
     expect(outcome.integrityOk).toBe(true);
   });
 
-  it("mutating a receipt field after issuance is detected by hash recomputation, not just trusted", () => {
-    const receipt = buildReceipt(baseInput({ decision: "REFUSE", refusalCode: "ATTESTATION_EXPIRED" }));
+  it("mutating a receipt field after issuance is detected by hash recomputation, not just trusted", async () => {
+    const receipt = await buildReceipt(baseInput({ decision: "REFUSE", refusalCode: "ATTESTATION_EXPIRED" }));
     const tampered = { ...receipt, decision: "AUTHORIZE" as const, refusalCode: undefined };
 
     const outcome = verifyReceipt(tampered);
@@ -59,15 +59,15 @@ describe("receipt verifier recomputation", () => {
     expect(outcome.integrityOk).toBe(false);
   });
 
-  it("a valid REFUSE receipt is a successful proof artifact, not treated as an error", () => {
-    const receipt = buildReceipt(baseInput({ decision: "REFUSE", refusalCode: "WALLET_MISMATCH", authorization: undefined }));
+  it("a valid REFUSE receipt is a successful proof artifact, not treated as an error", async () => {
+    const receipt = await buildReceipt(baseInput({ decision: "REFUSE", refusalCode: "WALLET_MISMATCH", authorization: undefined }));
     const outcome = verifyReceipt(receipt);
     expect(outcome.integrityOk).toBe(true);
     expect(outcome.decision).toBe("REFUSE");
   });
 
-  it("orion-provider receipts always report credential verification as NOT_CLAIMED", () => {
-    const receipt = buildReceipt(
+  it("orion-provider receipts always report credential verification as NOT_CLAIMED", async () => {
+    const receipt = await buildReceipt(
       baseInput({
         evidenceMode: "live",
         provider: { providerId: "orion" },
@@ -87,8 +87,8 @@ describe("receipt verifier recomputation", () => {
     expect(outcome.orionCredentialVerification).toBe("NOT_CLAIMED");
   });
 
-  it("an AUTHORIZE decision with no recorded lease fails the authorization-structure check", () => {
-    const receipt = buildReceipt(baseInput({ decision: "AUTHORIZE", authorization: undefined }));
+  it("an AUTHORIZE decision with no recorded lease fails the authorization-structure check", async () => {
+    const receipt = await buildReceipt(baseInput({ decision: "AUTHORIZE", authorization: undefined }));
     const outcome = verifyReceipt(receipt);
     const authCheck = outcome.checks.find((c) => c.id === "authorization_structure");
     expect(authCheck?.status).toBe("FAIL");
@@ -103,8 +103,8 @@ describe("receipt verifier recomputation", () => {
 // a stored/transmitted receipt would, and must be caught by the receipt
 // hash recomputation rather than any field-specific check.
 describe("receipt verifier tamper vectors", () => {
-  function issuedReceipt() {
-    return buildReceipt(
+  async function issuedReceipt() {
+    return await buildReceipt(
       baseInput({
         decision: "AUTHORIZE",
         authorization: {
@@ -125,19 +125,19 @@ describe("receipt verifier tamper vectors", () => {
   }
 
   it.each([
-    ["amount", (r: ReturnType<typeof issuedReceipt>) => ({ ...r, authorization: { ...r.authorization!, maxAmountAtomic: "999999999" } })],
-    ["target/candidate", (r: ReturnType<typeof issuedReceipt>) => ({ ...r, candidate: { ...r.candidate, id: "cand_other" } })],
-    ["policy hash", (r: ReturnType<typeof issuedReceipt>) => ({ ...r, policy: { ...r.policy, policyHash: "0xdifferent" } })],
+    ["amount", (r: Awaited<ReturnType<typeof issuedReceipt>>) => ({ ...r, authorization: { ...r.authorization!, maxAmountAtomic: "999999999" } })],
+    ["target/candidate", (r: Awaited<ReturnType<typeof issuedReceipt>>) => ({ ...r, candidate: { ...r.candidate, id: "cand_other" } })],
+    ["policy hash", (r: Awaited<ReturnType<typeof issuedReceipt>>) => ({ ...r, policy: { ...r.policy, policyHash: "0xdifferent" } })],
     [
       "credential-result hash",
-      (r: ReturnType<typeof issuedReceipt>) => ({ ...r, authorization: { ...r.authorization!, credentialResultHash: "0xdifferent" } }),
+      (r: Awaited<ReturnType<typeof issuedReceipt>>) => ({ ...r, authorization: { ...r.authorization!, credentialResultHash: "0xdifferent" } }),
     ],
-    ["context", (r: ReturnType<typeof issuedReceipt>) => ({ ...r, request: { ...r.request, contextId: "ctx_other" } })],
-    ["settlement data", (r: ReturnType<typeof issuedReceipt>) => ({ ...r, execution: { state: "SUCCEEDED" as const, transactionHash: "0xfake" } })],
-    ["evidence mode", (r: ReturnType<typeof issuedReceipt>) => ({ ...r, evidenceMode: "live" as const })],
-    ["receipt hash itself", (r: ReturnType<typeof issuedReceipt>) => ({ ...r, receiptHash: "0xforged" })],
-  ])("mutating %s is detected, not silently accepted", (_label, mutate) => {
-    const receipt = issuedReceipt();
+    ["context", (r: Awaited<ReturnType<typeof issuedReceipt>>) => ({ ...r, request: { ...r.request, contextId: "ctx_other" } })],
+    ["settlement data", (r: Awaited<ReturnType<typeof issuedReceipt>>) => ({ ...r, execution: { state: "SUCCEEDED" as const, transactionHash: "0xfake" } })],
+    ["evidence mode", (r: Awaited<ReturnType<typeof issuedReceipt>>) => ({ ...r, evidenceMode: "live" as const })],
+    ["receipt hash itself", (r: Awaited<ReturnType<typeof issuedReceipt>>) => ({ ...r, receiptHash: "0xforged" })],
+  ])("mutating %s is detected, not silently accepted", async (_label, mutate) => {
+    const receipt = await issuedReceipt();
     const tampered = mutate(receipt);
 
     const outcome = verifyReceipt(tampered);

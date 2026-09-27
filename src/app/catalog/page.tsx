@@ -3,9 +3,13 @@ import { EmptyState } from "@/components/EmptyState";
 import { CatalogTable } from "@/components/CatalogTable";
 import { HashValue } from "@/components/HashValue";
 import { EvidenceModeBadge } from "@/components/EvidenceModeBadge";
+import { getLatestCatalogRun } from "@/server/persistence/catalog-repo";
+
+export const dynamic = "force-dynamic";
 
 export default async function CatalogPage() {
-  const run = await hirewallApi.getLatestCatalogRun();
+  const run = process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_HIREWALL_USE_FIXTURES === "true"
+    ? await hirewallApi.getLatestCatalogRun() : await getLatestCatalogRun();
 
   if (!run) {
     return (
@@ -77,18 +81,11 @@ export default async function CatalogPage() {
       </div>
 
       <div className="mt-6 flex flex-wrap gap-4 text-[13px] font-medium text-accent">
-        <a href="#" className="hover:underline">
+        <a href={`/api/catalog/${encodeURIComponent(run.id)}/snapshot`} className="hover:underline">
           Download raw JSON
         </a>
-        <a href="#" className="hover:underline">
-          Reproduce run
-        </a>
-        <a href="#" className="hover:underline">
-          Methodology
-        </a>
-        <a href="#" className="hover:underline">
-          How could this result be misleading?
-        </a>
+        <a href="https://github.com/winsznx/hirewall/blob/main/scripts/run-catalog.ts" className="hover:underline">Reproduce run</a>
+        <a href="https://github.com/winsznx/hirewall/blob/main/evidence/campaign/gate-001-r2/README.md" className="hover:underline">Methodology and limits</a>
       </div>
     </div>
   );

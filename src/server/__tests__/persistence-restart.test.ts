@@ -50,7 +50,7 @@ function leaseInput(overrides: Partial<Parameters<typeof createLease>[0]> = {}) 
   };
 }
 
-function requestFor(lease: ReturnType<typeof createLease>, overrides: Partial<DispatchRequest> = {}): DispatchRequest {
+function requestFor(lease: Awaited<ReturnType<typeof createLease>>, overrides: Partial<DispatchRequest> = {}): DispatchRequest {
   return {
     contextId: lease.contextId,
     candidateId: lease.candidateId,
@@ -64,37 +64,37 @@ function requestFor(lease: ReturnType<typeof createLease>, overrides: Partial<Di
 }
 
 describe("persistence survives a simulated process restart", () => {
-  it("a valid lease is still valid after restart", () => {
-    const lease = createLease(leaseInput());
+  it("a valid lease is still valid after restart", async () => {
+    const lease = await createLease(leaseInput());
     restart();
-    const reread = getLease(lease.id);
+    const reread = await getLease(lease.id);
     expect(reread).toBeDefined();
     expect(reread?.id).toBe(lease.id);
-    const result = validateLease(lease.id, requestFor(lease), LATER);
+    const result = await validateLease(lease.id, requestFor(lease), LATER);
     expect(result.ok).toBe(true);
   });
 
-  it("an already-expired lease remains expired after restart", () => {
-    const lease = createLease(leaseInput());
+  it("an already-expired lease remains expired after restart", async () => {
+    const lease = await createLease(leaseInput());
     restart();
-    const result = validateLease(lease.id, requestFor(lease), MUCH_LATER);
+    const result = await validateLease(lease.id, requestFor(lease), MUCH_LATER);
     expect(result.ok).toBe(false);
     expect(result.failureCode).toBe("AUTHORIZATION_EXPIRED");
   });
 
-  it("a revoked lease remains revoked after restart", () => {
-    const lease = createLease(leaseInput());
-    revokeLease(lease.id);
+  it("a revoked lease remains revoked after restart", async () => {
+    const lease = await createLease(leaseInput());
+    await revokeLease(lease.id);
     restart();
-    const reread = getLease(lease.id);
+    const reread = await getLease(lease.id);
     expect(reread?.revoked).toBe(true);
-    const result = validateLease(lease.id, requestFor(lease), LATER);
+    const result = await validateLease(lease.id, requestFor(lease), LATER);
     expect(result.ok).toBe(false);
     expect(result.failureCode).toBe("AUTHORIZATION_REVOKED");
   });
 
   it("a consumed single-use authorization cannot be replayed after restart", async () => {
-    const lease = createLease(leaseInput());
+    const lease = await createLease(leaseInput());
     const succeeding = async (): Promise<ExecutionResult> => ({ state: "SUCCEEDED" });
     const executor = new Executor(succeeding);
 
@@ -109,7 +109,7 @@ describe("persistence survives a simulated process restart", () => {
   });
 
   it("a duplicate execute request cannot create a second execution after restart", async () => {
-    const lease = createLease(leaseInput());
+    const lease = await createLease(leaseInput());
     let transportCalls = 0;
     const counting = async (): Promise<ExecutionResult> => {
       transportCalls += 1;
@@ -126,8 +126,8 @@ describe("persistence survives a simulated process restart", () => {
     expect(transportCalls).toBe(1);
   });
 
-  it("a receipt remains retrievable and independently verifiable after restart", () => {
-    const receipt = buildReceipt({
+  it("a receipt remains retrievable and independently verifiable after restart", async () => {
+    const receipt = await buildReceipt({
       evidenceMode: "fixture",
       request: { contextId: "ctx_restart", maxSpendAtomic: "100000", chainId: 8453 },
       candidate: { id: "cand_restart", source: "fixture" },
@@ -160,7 +160,7 @@ describe("persistence survives a simulated process restart", () => {
 
     restart();
 
-    const reread = getReceipt(receipt.receiptId);
+    const reread = await getReceipt(receipt.receiptId);
     expect(reread).toBeDefined();
     expect(reread?.receiptHash).toBe(receipt.receiptHash);
 
@@ -169,7 +169,7 @@ describe("persistence survives a simulated process restart", () => {
   });
 
   it("an EXECUTION_UNKNOWN result is persisted as-is and is never silently retried into a second attempt", async () => {
-    const lease = createLease(leaseInput());
+    const lease = await createLease(leaseInput());
     let transportCalls = 0;
     const ambiguous = async (): Promise<ExecutionResult> => {
       transportCalls += 1;
@@ -190,8 +190,8 @@ describe("persistence survives a simulated process restart", () => {
     expect(transportCalls).toBe(1);
   });
 
-  it("fixture evidence mode survives persistence and is never upgraded to live on reread", () => {
-    const receipt = buildReceipt({
+  it("fixture evidence mode survives persistence and is never upgraded to live on reread", async () => {
+    const receipt = await buildReceipt({
       evidenceMode: "fault_injection",
       request: { contextId: "ctx_fault", maxSpendAtomic: "1", chainId: 8453 },
       candidate: { id: "cand_fault", source: "fixture" },
@@ -214,7 +214,7 @@ describe("persistence survives a simulated process restart", () => {
 
     restart();
 
-    const reread = getReceipt(receipt.receiptId);
+    const reread = await getReceipt(receipt.receiptId);
     expect(reread?.evidenceMode).toBe("fault_injection");
   });
 });

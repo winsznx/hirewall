@@ -59,14 +59,11 @@ export class RemoteHirewallApi implements HirewallApi {
   }
 
   subscribeToDispatch(id: string, onEvent: (event: WorkflowEvent) => void): () => void {
-    // SSE trace streaming (/api/dispatch/:id/events) is not implemented
-    // yet — the backend currently returns the full workflow synchronously
-    // on create/execute rather than streaming incremental events. Callers
-    // should poll getDispatch() in the meantime. This is a real limitation,
-    // not a fixture fallback.
-    void id;
-    void onEvent;
-    return () => {};
+    const source = new EventSource(this.url(`/api/dispatch/${encodeURIComponent(id)}/events`));
+    source.addEventListener("workflow", (message) => {
+      try { onEvent(JSON.parse((message as MessageEvent).data) as WorkflowEvent); } catch { source.close(); }
+    });
+    return () => source.close();
   }
 
   async executeDispatch(id: string): Promise<DispatchWorkflow> {
@@ -103,11 +100,9 @@ export class RemoteHirewallApi implements HirewallApi {
   }
 
   async getLatestCatalogRun(): Promise<CatalogRun | null> {
-    // No frozen catalog experiment exists yet — that requires a live
-    // Orion Store cohort (HIREWALL_PRD.md section 12.12), which is
-    // blocked by GATE-001. Honestly return null rather than fabricating
-    // or silently reusing frontend fixture data — see BUILD_CONTRACT.md
-    // section 6.
-    return null;
+    const response = await fetch(this.url("/api/catalog/latest"), { cache: "no-store" });
+    if (response.status === 404) return null;
+    if (!response.ok) throw new Error(`getLatestCatalogRun failed: ${response.status}`);
+    return response.json();
   }
 }

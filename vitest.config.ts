@@ -6,7 +6,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "node",
-    include: ["src/server/**/*.test.ts"],
+    include: ["src/**/*.test.ts"],
     // Each test file gets its own SQLite database via a unique
     // HIREWALL_DB_PATH (see src/server/__tests__/setup.ts) so that tests
     // in different files never share persisted state, while tests within
