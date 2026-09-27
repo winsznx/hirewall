@@ -23,7 +23,14 @@ export class RemoteHirewallApi implements HirewallApi {
     const base = this.baseUrl.replace(/\/$/, "");
     if (base) return `${base}${path}`;
     if (typeof window !== "undefined") return path;
-    const host = process.env.VERCEL_URL;
+    // Server-side self-fetch (e.g. a Server Component rendering a
+    // workflow page). VERCEL_URL is the per-deployment hash URL
+    // (hirewall-<hash>-<team>.vercel.app), which Vercel's Deployment
+    // Protection gates behind an SSO redirect even in production —
+    // fetching it here would get an HTML login page back instead of
+    // JSON. VERCEL_PROJECT_PRODUCTION_URL is the stable, unprotected
+    // production domain (hirewall.vercel.app) and must be preferred.
+    const host = process.env.VERCEL_ENV === "production" ? process.env.VERCEL_PROJECT_PRODUCTION_URL : process.env.VERCEL_URL;
     return host ? `https://${host}${path}` : `http://localhost:${process.env.PORT ?? "3000"}${path}`;
   }
 
