@@ -153,14 +153,13 @@ async function runCandidate(
     workflow.credentialResult = credential;
     await pushEvent(workflow, "verification.result", { status: credential.status }, candidate.id);
 
-    if (credential.status === "UNVERIFIABLE") {
-      const code = credential.refusalCode ?? "DEPENDENCY_UNAVAILABLE";
-      workflow.attemptedCandidates.push({ candidate, decision: "UNVERIFIABLE", refusalCode: code });
-      if (deferFailure) await pushEvent(workflow, "candidate.unverifiable", { code }, candidate.id);
-      else await finalizeUnverifiable(workflow, code, "provider returned UNVERIFIABLE");
-      return false;
-    }
-
+    // Always evaluate policy, even for an UNVERIFIABLE credential —
+    // IDENTITY_REQUIRED can still authorize on Orion's real
+    // UNVERIFIABLE/ATTESTATION_MISSING result (onchain identity established,
+    // only the signed reputation credential unavailable). See DECISIONS.md
+    // DEC-008 and policy/engine.ts. Short-circuiting here regardless of
+    // policy level was a real bug: it made IDENTITY_REQUIRED behave
+    // identically to REPUTATION_REQUIRED for every real candidate.
     workflow.state = "POLICY_EVALUATING";
     const policyResult = evaluatePolicy(workflow.policy, credential, workflow.request.maxSpendAtomic, nowIso());
     workflow.policyResult = policyResult;
@@ -168,10 +167,20 @@ async function runCandidate(
 
     if (!policyResult.ok) {
       const code = policyResult.failureCode ?? "POLICY_REJECTED";
+      // A credential the provider itself marked UNVERIFIABLE (dependency
+      // unavailable, no proof to evaluate) stays UNVERIFIABLE even when
+      // policy also rejects it. A credential the provider definitively
+      // REFUSED, or a policy-only failure (e.g. budget) on an otherwise
+      // usable credential, is a REFUSE.
+      const unverifiable = credential.status === "UNVERIFIABLE";
+      workflow.attemptedCandidates.push({ candidate, decision: unverifiable ? "UNVERIFIABLE" : "REFUSE", refusalCode: code });
       if (deferFailure) {
-        workflow.attemptedCandidates.push({ candidate, decision: "REFUSE", refusalCode: code });
-        await pushEvent(workflow, "candidate.refused", { code }, candidate.id);
-      } else await finalizeRefuse(workflow, code, candidate);
+        await pushEvent(workflow, unverifiable ? "candidate.unverifiable" : "candidate.refused", { code }, candidate.id);
+      } else if (unverifiable) {
+        await finalizeUnverifiable(workflow, code, "policy could not be established from an unverifiable credential");
+      } else {
+        await finalizeRefuse(workflow, code, candidate);
+      }
       return false;
     }
 
@@ -204,11 +213,12 @@ async function runCandidate(
   }
 }
 
+// Caller already pushes to workflow.attemptedCandidates before branching
+// into this terminal path — see runCandidate().
 async function finalizeRefuse(workflow: WorkflowRecord, code: RefusalCode, candidate: ResolvedCandidate): Promise<void> {
   workflow.decision = "REFUSE";
   workflow.refusalCode = code;
   workflow.state = "REFUSED";
-  workflow.attemptedCandidates.push({ candidate, decision: "REFUSE", refusalCode: code });
   await pushEvent(workflow, "workflow.refused", { code }, candidate.id);
   await emitReceipt(workflow);
 }
