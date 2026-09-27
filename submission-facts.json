@@ -1,10 +1,10 @@
 {
   "schemaVersion": "1.0",
-  "status": "incomplete — GATE-001-R2 conditionally passed for onchain identity only",
+  "status": "deployed; live Orion cohort screened; signed authorization remains unavailable",
   "canonicalOneLiner": "No valid AgentBound authorization, no dispatch through HIREWALL.",
   "deploymentUrls": {
-    "web": null,
-    "api": null
+    "web": "https://hirewall.vercel.app",
+    "api": "https://hirewall.vercel.app/api"
   },
   "network": {
     "chain": "Base",
@@ -12,54 +12,74 @@
   },
   "orionIntegration": {
     "surface": "public Store API, x402 info API, and AgentBound Base registry",
-    "status": "partial — live contract and candidate state observed; signed credential not retrieved",
+    "status": "partial — Store and onchain AgentBound state independently observed; signed credential endpoints for minted agents return 404",
     "reason": "gate-001-r2",
-    "identifiersUsed": ["rigel (Store ID 16)", "audit (Store ID 18)"],
-    "note": "The public Orion application is restored. Independent Base reads confirm AgentBound tokens for Rigel and AUDIT, contract 0xb006ca09e390eb3082bb3cb0b43e788ebc6e76a0, and oracle 0x7cDd6Ea617c4F5F1c9a5128D2940c72e1A2E4900. Their signed attestation endpoints currently return 404. See GATE-001-R2 and evidence/campaign/gate-001-r2/."
+    "identifiersUsed": [
+      "basescout (Store ID 17)",
+      "rigel (Store ID 16)",
+      "audit (Store ID 18)"
+    ],
+    "note": "The 52-entry live Store cohort was screened on Base. Rigel and AUDIT have minted AgentBound state but no retrievable signed wallet attestation, so no live lease was created. See GATE-001-R3 and evidence/campaign/catalog-2026-09-27/."
   },
   "enforcementMechanism": {
-    "status": "implemented, tested, durable, blocked from live Orion evidence",
-    "note": "The enforcement chain is implemented with SQLite persistence and 54 passing deterministic tests. The Orion provider resolves real Store agents and verifies Base AgentBound plus signed EIP-191 attestations; sampled live agents have no retrievable signed attestation, so no live authorization has been produced.",
+    "status": "implemented, tested, deployed with Neon persistence; live signed authorization blocked by Orion artifact availability",
+    "note": "Production workflow resolves Store workers, reads AgentBound, evaluates policy, persists refusal receipts in Neon, and gates x402 execution behind a lease. Public Rigel dispatch returned UNVERIFIABLE/ATTESTATION_MISSING, no lease, and NOT_ATTEMPTED execution.",
     "testCommand": "npm run test",
-    "testCount": 54,
+    "testCount": 63,
     "durability": {
-      "status": "local durable path implemented (SQLite via node:sqlite)",
-      "limitation": "does not survive a horizontally-scaled serverless deployment's ephemeral per-instance filesystem; a hosted database is required before multi-instance production deployment",
-      "verifiedBy": "8 process-restart tests plus a smoke test against the compiled production server (npm run build && npm run start), not just the in-process test suite"
+      "status": "production Neon Postgres provisioned and connected on Vercel",
+      "verifiedBy": "real Neon lease write/read/revoke, migration 1 check, 8 local restart tests, and public deployed workflow/receipt retrieval",
+      "limitation": "multi-instance concurrent paid execution has not been exercised"
     }
   },
   "competition": {
     "deadline": "2026-09-27T23:59:00Z",
-    "deadlineExtensionClaim": {
-      "claim": "Orion extended the Builder Hackathon by 14 days; 300+ builders, 18 live applications",
-      "source": "reported to this agent by the operator, attributed to public mirrors of @Orion_Agents",
-      "status": "unverified — no independent corroboration found (no official account, hackathon page, or news mirror located via web search as of 2026-09-04)",
-      "note": "Not asserted as true or false. No deadline of any kind is asserted in this repo until independently confirmed from an official source."
+    "deadlineSource": "https://orionagents.org/hackathon and live submission UI"
+  },
+  "sourceCommit": "43ef14456639656fe16107dd2a398715720c3d5e",
+  "verifierVersion": "0.1.0",
+  "policyVersion": "0.1.0",
+  "headlineExperiment": {
+    "runId": "cat_3e2f9edc-ac77-439c-baf9-71bfae5dec39",
+    "runTimestamp": "2026-09-27T19:21:06.167Z",
+    "snapshotHash": "sha256:11e825da496ca4ca41543533c1584839a89d0e201cdf1400dcca1a422d278f96",
+    "cohortDenominator": 52,
+    "measuredDecisions": {
+      "authorize": 0,
+      "refuse": 48,
+      "unverifiable": 4
     }
   },
-  "sourceCommit": null,
-  "verifierVersion": null,
-  "policyVersion": null,
-  "headlineExperiment": {
-    "runId": null,
-    "cohortDenominator": null,
-    "measuredDecisions": null
-  },
   "liveTransactions": [],
-  "publicReceiptIds": [],
+  "publicReceiptIds": [
+    "rcpt_3153d596-4458-4612-9dfe-5ac04d12f38e",
+    "rcpt_938380a8-57b5-47a3-a916-81f43cfc37df"
+  ],
   "reproductionCommands": [
-    "npm run test",
-    "npm run verify:receipt -- <path|url|->"
+    "npm ci && npm test && npm run typecheck && npm run lint && npm run build",
+    "npm run verify:receipt -- evidence/campaign/catalog-2026-09-27/rigel-receipt.json",
+    "HIREWALL_DB_BACKEND=neon npm run catalog:run (requires DATABASE_URL and network)",
+    "curl https://hirewall.vercel.app/api/catalog/latest"
   ],
   "evidenceClassification": {
-    "live": ["GATE-001-R2 public Store and Base registry reads; no signed attestation or dispatch"],
-    "fixture": ["all frontend fixture scenarios listed in HIREWALL_FRONTEND_HANDOFF.md section 28"],
-    "faultInjection": ["fault_injection_tamper", "fault_injection_expiry"]
+    "live": [
+      "evidence/campaign/gate-001-r2/",
+      "evidence/campaign/catalog-2026-09-27/",
+      "public production Rigel receipt rcpt_938380a8-57b5-47a3-a916-81f43cfc37df"
+    ],
+    "fixture": [
+      "explicit development adapter and local Proof Lab"
+    ],
+    "faultInjection": [
+      "HIREWALL-owned Proof Lab scenarios; no simulated Orion signature proof"
+    ]
   },
   "limitations": [
-    "The backend exists and the frontend calls it by default. The Orion provider is implemented against observed public surfaces but sampled signed attestations return 404; frontend fixture mode requires an explicit development opt-in.",
-    "GATE-001-R2 found live AgentBound state, but signed wallet-bound attestation retrieval and verification have not passed — see GATES.md.",
-    "No live transaction, receipt, or catalog run has been produced. All numbers in this file are null, not placeholder values, until measured."
+    "No public signed Orion attestation was retrieved for a minted candidate; real live authorization and paid dispatch have not been demonstrated.",
+    "No matching Orion worker x402 endpoint and funded payer have been established; the transport is wired and its quote guards are tested, but no live transaction is claimed.",
+    "The offline receipt hash is not an issuer signature. Orion-specific credential verification remains NOT_CLAIMED in the offline verifier.",
+    "One of 52 catalog checks was UNVERIFIABLE due to a dependency error; it was not reclassified as an identity failure."
   ],
-  "withdrawnClaims": []
+  "withdrawnClaims": [],
+  "submissionStatus": "not submitted; ignition, demo video, and operator wallet signature remain"
 }
