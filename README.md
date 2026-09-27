@@ -11,7 +11,14 @@ HIREWALL is a buyer-side dispatch firewall for the Orion agent marketplace: **no
 
 ## Where this stands right now
 
-Orion's Store and its onchain AgentBound registry are live and reachable. Its signed attestation API is not: every sampled minted agent's `/api/x402/attestation/{id}` returns 404. HIREWALL is built to enforce a rule it has never yet had the chance to enforce against a real credential — it refuses, correctly, because there is nothing valid to authorize. See [GATES.md](GATES.md) for the exact evidence and [CLAIMS.md](CLAIMS.md) for what is and isn't claimed as a result.
+Orion's Store and its onchain AgentBound registry are live and reachable. Its signed reputation attestation API is not: every sampled minted agent's `/api/x402/attestation/{id}` returns 404. HIREWALL enforces two explicit, separately labeled buyer policy levels rather than silently weakening its strict default:
+
+- **`REPUTATION_REQUIRED`** (default) — onchain identity plus a fresh, signed attestation. Still correctly refuses every real candidate today, since Orion returns no attestation.
+- **`IDENTITY_REQUIRED`** — the authoritative onchain AgentBound state alone (existence, mint, not-slashed, read directly from Base), and *never* claims to have checked wallet binding or reputation freshness. This level now issues real authorization leases against live evidence.
+
+First real (non-fixture) `AUTHORIZE`: [receipt rcpt_e01e8665-d352-4ea7-9eed-7a5d3a35d946](https://hirewall.vercel.app/receipts/rcpt_e01e8665-d352-4ea7-9eed-7a5d3a35d946) — candidate Rigel (Store id 16), onchain AgentBound independently verified on Base, real lease issued, `policyLevel: IDENTITY_REQUIRED` recorded on the receipt so it can never be misread as a reputation claim.
+
+A dedicated, low-balance execution wallet is funded on Base mainnet (`0xe7B0E20EaDd5Cf1aaA8D09C199B16c77B7035Dac`, ~$2 USDC, capped) for the next phase of this proof. No paid x402 execution has happened yet: it requires a seller endpoint whose quoted `payTo` matches an attested candidate wallet, and no such endpoint has been found or verified. No transaction hash is claimed here because none exists — see [DECISIONS.md](DECISIONS.md) DEC-008 and [GATES.md](GATES.md) for the exact evidence.
 
 ## Why
 
@@ -40,8 +47,8 @@ Store resolve → AgentBound read (Base) → attestation verify → buyer policy
 | Deterministic enforcement (policy, lease, no-bypass executor, replay rejection) | Done, 63 passing tests, including 8 that simulate a full process restart |
 | Receipts survive a restart and recompute offline | Done, verified against SQLite restart tests and a real Neon read/write/revoke cycle |
 | A worker's signed attestation verified live | **Not done.** Orion's endpoint 404s for every candidate sampled, including minted ones (Rigel, AUDIT) |
-| A real `AUTHORIZE` decision | **Never happened outside a fixture** — nothing to authorize has existed yet |
-| A live x402 payment | **Not done.** Transport is wired and tested; no funded payer or matching seller is configured |
+| A real `AUTHORIZE` decision | **Done, under `IDENTITY_REQUIRED`** — [rcpt_e01e8665...](https://hirewall.vercel.app/receipts/rcpt_e01e8665-d352-4ea7-9eed-7a5d3a35d946), live Base AgentBound state, explicitly not a reputation claim |
+| A live x402 payment | **Not done.** Transport is wired and tested, wallet is funded (~$2 USDC on Base); no seller endpoint with a matching `payTo` has been found yet |
 
 ## Try it
 
@@ -69,7 +76,7 @@ Requires Node 24.
 
 ```bash
 npm ci
-npm test          # 63 tests: invariants, replay/restart, receipt tamper vectors, x402 preflight
+npm test          # 69 tests: invariants, replay/restart, receipt tamper vectors, x402 preflight, policy-level separation
 npm run typecheck
 npm run lint
 npm run build
